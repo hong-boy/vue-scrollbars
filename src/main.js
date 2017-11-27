@@ -2,11 +2,18 @@
 import Vue from 'vue';
 import App from './app.vue'
 
-console.log('aa');
+console.log('------------------aaaaa---aa--------------');
 new Vue({
     el: '#layout',
-    render(h){
-        console.log('aa');
-        return h(App)
+    render: function (h) {
+        return <div id="test">
+            <p>aaaaaaaaaaaaaaaaaa</p>
+            <p>aaaaaaaaaaaaaaaaaa</p>
+            <p>aaaaaaaaaaaaaaaaaa</p>
+            <p>aaaaaaaaaaaaaaaaaa</p>
+            <p>aaaaaaaaaaaaaaaaaa</p>
+            <p>aaaaaaaaaaaaaaaaaa</p>
+            <p>aaaaaaaaaaaaaaaaaa</p>
+        </div>
     }
 });

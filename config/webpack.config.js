@@ -23,15 +23,15 @@ module.exports = {
     },
     devServer: {
         port: 18888,
-        hot: true,
+        // hot: true,
         inline: true,
-        open: true,
+        open: false,
         publicPath: '/',
         stats: 'normal',
     },
     plugins: [
         new HtmlWebpackPlugin({
-            inject: true,
+            // inject: true,
             filename: 'index.html',
             template: path.resolve(rootdir, 'src/index.html')
         }),
