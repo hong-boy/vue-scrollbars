@@ -214,6 +214,14 @@ let util = Object.assign(common, {
         var scrollSize = getBrowserScrollSize(true);
         return !(scrollSize.height || scrollSize.width);
     },
+    isVerticalScroll(event) {
+        var e = event.originalEvent;
+        if (e.axis && e.axis === e.HORIZONTAL_AXIS)
+            return false;
+        if (e.wheelDeltaX)
+            return false;
+        return true;
+    },
     storeHandlers(inst, eventName, element, handler){
         inst._handlers.set(eventName, {element: element, handler: handler});
     }
@@ -255,6 +263,10 @@ class Scrollbar {
         let el = self.el;
         let cw = self.containerWrapper || el;
         let wrapper = self.wrapper;
+        let initScroll = {
+            scrollLeft: self.el.scrollLeft,
+            scrollTop: self.el.scrollTop,
+        };
         options = self.options = Object.assign({}, DEFAULTS, options);
         if (!wrapper) {
             // first init
@@ -343,9 +355,139 @@ class Scrollbar {
         //初始化滚动条（绘制滚动条DOM结构，并计算大小）
         let bar = {x: self.scrollx, y: self.scrolly};
         self._renderBars(bar);
+        // reset styles
+        self._reset4BarCSS(bar);
+        // calc init sizes
+        self._calcInitSize4Bars(bar);
+        // update scrollbar visibility/dimensions
+        self._updateScroll('x', self.scrollx);
+        self._updateScroll('y', self.scrolly);
+        if (typeof options.onUpdate === 'function') {
+            options.onUpdate.apply(this, [self.el]);
+        }
+        // calc scrollbar size
+        self._calcSize4Bars(bar);
+
+        self.el.scrollLeft = initScroll.scrollLeft;
+        self.el.scrollTop = initScroll.scrollTop;
+        util.trigger(self.el, 'scroll');
     }
 
     destroy() {
+    }
+
+    _updateScroll(d, scrollx) {
+        var container = this.el,
+            containerWrapper = this.containerWrapper || container,
+            scrollClass = 'scroll-scroll' + d + '_visible',
+            scrolly = (d === 'x') ? this.scrolly : this.scrollx,
+            offset = parseInt(util.css(this.container, (d === 'x') ? 'left' : 'top'), 10) || 0,
+            wrapper = this.wrapper;
+
+        var AreaSize = scrollx.size;
+        var AreaVisible = scrollx.visible + offset;
+
+        scrollx.isVisible = (AreaSize - AreaVisible) > 1; // bug in IE9/11 with 1px diff
+        if (scrollx.isVisible) {
+            util.addClass(scrollx.scroll, scrollClass);
+            util.addClass(scrolly.scroll, scrollClass);
+            util.addClass(containerWrapper, scrollClass);
+        } else {
+            util.removeClass(scrollx.scroll, scrollClass);
+            util.removeClass(scrolly.scroll, scrollClass);
+            util.removeClass(containerWrapper, scrollClass);
+        }
+
+        if (d === 'y') {
+            if (container.tagName.toLowerCase() === 'textarea' || AreaSize < AreaVisible) {
+                util.css(containerWrapper, {
+                    "height": (AreaVisible + BROWSER.scroll.height) + 'px',
+                    "max-height": "none"
+                });
+            } else {
+                util.css(containerWrapper, {
+                    //"height": "auto", // do not reset height value: issue with height:100%!
+                    "max-height": (AreaVisible + BROWSER.scroll.height) + 'px'
+                });
+            }
+        }
+
+        if (scrollx.size != container.scrollWidth
+            || scrolly.size != container.scrollHeight
+            || scrollx.visible != wrapper.clientWidth
+            || scrolly.visible != wrapper.clientHeight
+            || scrollx.offset != (parseInt(util.css(container, 'left'), 10) || 0)
+            || scrolly.offset != (parseInt(util.css(container, 'top'), 10) || 0)
+        ) {
+            Object.assign(this.scrollx, {
+                offset: parseInt(util.css(container, 'left'), 10) || 0,
+                size: container.scrollWidth,
+                visible: wrapper.clientWidth
+            });
+            Object.assign(this.scrolly, {
+                offset: parseInt(container.css('top'), 10) || 0,
+                size: this.container.scrollHeight,
+                visible: wrapper.clientHeight
+            });
+            this._updateScroll(d === 'x' ? 'y' : 'x', scrolly);
+        }
+    }
+
+    _reset4BarCSS(bar) {
+        let self = this;
+        // remove classes & reset applied styles
+        Object.keys(bar).sort().forEach(function (key) {
+            let item = bar[key];
+            var scrollClass = 'scroll-scroll' + key + '_visible';
+            var scrolly = (key == "x") ? bar.y : bar.x;
+
+            util.removeClass(item.scroll, scrollClass);
+            util.removeClass(scrolly.scroll, scrollClass);
+            util.removeClass(self.containerWrapper, scrollClass);
+        });
+    }
+
+    _calcInitSize4Bars(bar) {
+        // remove classes & reset applied styles
+        let self = this;
+        Object.keys(bar).sort().forEach(function (key) {
+            let item = bar[key];
+            Object.assign(item, (key == "x") ? {
+                offset: parseInt(util.css(self.el, 'left'), 10) || 0,
+                size: self.el.scrollWidth,
+                visible: self.wrapper.clientWidth
+            } : {
+                offset: parseInt(util.css(self.el, 'top'), 10) || 0,
+                size: self.el.scrollHeight,
+                visible: self.wrapper.clientHeight
+            });
+        });
+    }
+
+    _calcSize4Bars(bar) {
+        // calculate scroll size
+        let self = this;
+        Object.keys(bar).sort().forEach(function (key) {
+            let item = bar[key];
+            var cssOffset = (key === 'x') ? 'left' : 'top';
+            var cssFullSize = (key === 'x') ? 'offsetWidth' : 'offsetHeight';
+            var cssSize = (key === 'x') ? 'clientWidth' : 'clientHeight';
+            var offset = parseInt(util.css(self.el, cssOffset), 10) || 0;
+
+            var AreaSize = item.size;
+            var AreaVisible = item.visible + offset;
+
+            var scrollSize = item.scroll.size[cssFullSize] + (parseInt(util.css(item.scroll.size, cssOffset), 10) || 0);
+
+            if (self.options.autoScrollSize) {
+                item.scrollbarSize = parseInt(scrollSize * AreaVisible / AreaSize, 10);
+                item.scroll.bar[cssSize] = item.scrollbarSize; //.css(cssSize, item.scrollbarSize + 'px');
+            }
+
+            item.scrollbarSize = item.scroll.bar[cssFullSize];
+            item.ratio = ((scrollSize - item.scrollbarSize) / (AreaSize - AreaVisible)) || 1;
+            item.maxScrollOffset = AreaSize - AreaVisible;
+        });
     }
 
     /**
@@ -363,8 +505,23 @@ class Scrollbar {
                 return;
             }
             // first init
+            let scrollCallback = null;
             let scroll2Value = 0;
+            let scrollForward = 1;
+            let scrollStep = options.scrollStep;
             let offsetPos = key === 'x' ? 'offsetLeft' : 'offsetTop';
+            let scrollTo = function () {
+                var currentOffset = self.el[offsetPos]();
+                self.el[offsetPos](currentOffset + scrollStep);
+                if (scrollForward == 1 && (currentOffset + scrollStep) >= scroll2Value)
+                    currentOffset = self[offsetPos]();
+                if (scrollForward == -1 && (currentOffset + scrollStep) <= scroll2Value)
+                    currentOffset = self[offsetPos]();
+                if (self[offsetPos]() == currentOffset && scrollCallback) {
+                    scrollCallback();
+                }
+            };
+
             let scroll = item.scroll = self._getBar(options[`scroll${key}`]);
             util.addClass(scroll, `scroll-${key}`);
 
@@ -373,7 +530,43 @@ class Scrollbar {
             }
 
             item.mousewheel = function (e) {
+                if (!item.isVisible || (key === 'x' && util.isVerticalScroll(e))) {
+                    bar.x.mousewheel(e);
+                    return;
+                }
+                let delta = e.originalEvent.wheelDelta * -1 || e.originalEvent.detail;
+                let maxScrollValue = item.size - item.visible - item.offset;
+                // fix new mozilla
+                if (!delta) {
+                    if (key === 'x' && !!e.originalEvent.deltaX) {
+                        delta = e.originalEvent.deltaX * 40;
+                    } else if (key === 'y' && !!e.originalEvent.deltaY) {
+                        delta = e.originalEvent.deltaY * 40;
+                    }
+                }
 
+                if ((delta > 0 && scroll2Value < maxScrollValue) || (delta < 0 && scroll2Value > 0)) {
+                    scroll2Value = scroll2Value + delta;
+                    if (scroll2Value < 0)
+                        scroll2Value = 0;
+                    if (scroll2Value > maxScrollValue)
+                        scroll2Value = maxScrollValue;
+
+                    self.scrollTo = self.scrollTo || {};
+                    self.scrollTo[offsetPos] = scroll2Value;
+                    window.requestAnimationFrame(function () {
+                        if (self.scrollTo) {
+                            //TODO use css animation
+                            self.el[offsetPos] = self.scrollTo;
+                            scroll2Value = self.scrollTo;
+                            self.scrollTo = null;
+                        }
+                    });
+                }
+
+                e.preventDefault();
+                e.stopPropagation && e.stopPropagation();
+                e.cancelBubble && e.cancelBubble();
             };
 
             util.addEvent(item.scroll, 'wheel', item.mousewheel);
@@ -382,8 +575,71 @@ class Scrollbar {
             util.storeHandlers(self, 'mouseenter', item.scroll, item.mousewheel);
 
             // For .scroll-arrow and .scroll-element_track click
-            let mousedown = function (e) {
-                //TODO
+            let mousedown = function (event) {
+                if (event.which != 1) // lmb
+                    return true;
+
+                scrollForward = 1;
+
+                var data = {
+                    eventOffset: event[(key === 'x') ? 'pageX' : 'pageY'],
+                    maxScrollValue: item.size - item.visible - item.offset,
+                    scrollbarOffset: util.offset(item.scroll.bar)[(key === 'x') ? 'left' : 'top'],
+                    scrollbarSize: item.scroll.bar[(key === 'x') ? 'offsetWidth' : 'offsetHeight']
+                };
+                var timeout = 0, timer = 0;
+
+                if (util.hasClass(this, 'scroll-arrow')) {
+                    scrollForward = util.hasClass(this, "scroll-arrow_more") ? 1 : -1;
+                    scrollStep = options.scrollStep * scrollForward;
+                    scroll2Value = scrollForward > 0 ? data.maxScrollValue : 0;
+                    if (options.isRtl) {
+                        switch (true) {
+                            case BROWSER.firefox:
+                                scroll2Value = scrollForward > 0 ? 0 : data.maxScrollValue * -1;
+                                break;
+                            case BROWSER.msie || BROWSER.msedge:
+                                break;
+                        }
+                    }
+                } else {
+                    scrollForward = (data.eventOffset > (data.scrollbarOffset + data.scrollbarSize) ? 1
+                        : (data.eventOffset < data.scrollbarOffset ? -1 : 0));
+                    if (key === 'x' && options.isRtl && (BROWSER.msie || BROWSER.msedge))
+                        scrollForward = scrollForward * -1;
+                    scrollStep = Math.round(item.visible * 0.75) * scrollForward;
+                    scroll2Value = (data.eventOffset - data.scrollbarOffset -
+                    (options.stepScrolling ? (scrollForward == 1 ? data.scrollbarSize : 0)
+                        : Math.round(data.scrollbarSize / 2)));
+                    scroll2Value = self.el[offsetPos]() + (scroll2Value / item.ratio);
+                }
+
+                self.scrollTo = self.scrollTo || {};
+                self.scrollTo[offsetPos] = options.stepScrolling ? self.el[offsetPos]() + scrollStep : scroll2Value;
+
+                if (options.stepScrolling) {
+                    scrollCallback = function () {
+                        scroll2Value = self.el[offsetPos]();
+                        clearInterval(timer);
+                        clearTimeout(timeout);
+                        timeout = 0;
+                        timer = 0;
+                    };
+                    timeout = setTimeout(function () {
+                        timer = setInterval(scrollTo, 40);
+                    }, options.duration + 100);
+                }
+
+                setTimeout(function () {
+                    if (self.scrollTo) {
+                        // c.animate(S.scrollTo, o.duration);
+                        //TODO use css animation
+                        // self.el[offsetPos]
+                        self.scrollTo = null;
+                    }
+                }, 1);
+
+                self._handleMouseDown(scrollCallback, event);
             };
             util.addEvent(item.scroll.querySelector('.scroll-arrow'), 'mousedown', mousedown);
             util.storeHandlers(self, 'mousedown', item.scroll.querySelector('.scroll-arrow'), mousedown);
@@ -433,7 +689,7 @@ class Scrollbar {
 
     _handleMouseDown(callback, event) {
         let self = this;
-        util.addEvent(document, 'blur', function blur4doc() {
+        util.addEvent(document, 'blur', function blur4doc(e) {
             let body = document.querySelector('body');
             util.removeEvent(document, 'blur', blur4doc);
             util.removeEvent(document, 'dragstart', dragstart4doc);
@@ -451,7 +707,7 @@ class Scrollbar {
         // util.storeHandlers(self, 'dragstart', document, dragstart4doc);
 
 
-        util.addEvent(document, 'mouseup', function blur4doc() {
+        util.addEvent(document, 'mouseup', function blur4doc(e) {
             let body = document.querySelector('body');
             util.removeEvent(document, 'blur', blur4doc);
             util.removeEvent(document, 'dragstart', dragstart4doc);
@@ -467,8 +723,8 @@ class Scrollbar {
         // util.storeHandlers(self, 'selectstart', document.querySelector('body'), selectstart4doc);
 
         event && event.preventDefault();
-        e.stopPropagation && e.stopPropagation();
-        e.cancelBubble && e.cancelBubble();
+        event.stopPropagation && event.stopPropagation();
+        event.cancelBubble && event.cancelBubble();
     }
 }
 
