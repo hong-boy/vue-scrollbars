@@ -1,8 +1,11 @@
 'use strict';
 import Vue from 'vue';
-import App from './app.vue'
+import './scrollbars/directive.js'
 
-console.log('------------------aaaaa---aa--------------');
+console.log(new Vue().$isServer);
+
+window.Vue = Vue;
+
 new Vue({
     el: '#layout',
     render: function (h) {
