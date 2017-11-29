@@ -1,22 +1,18 @@
 'use strict';
 import Vue from 'vue';
-import './scrollbars/directive.js'
+import $ from 'jquery';
+import scroll from './scrollbars/directive.js'
+import Layout from './layout.vue'
+import 'normalize.css'
+import './scrollbars/scrollbar.css'
 
-console.log(new Vue().$isServer);
+Vue.use(scroll);
 
-window.Vue = Vue;
+window.$ = $;
 
 new Vue({
     el: '#layout',
     render: function (h) {
-        return <div id="test">
-            <p>aaaaaaaaaaaaaaaaaa</p>
-            <p>aaaaaaaaaaaaaaaaaa</p>
-            <p>aaaaaaaaaaaaaaaaaa</p>
-            <p>aaaaaaaaaaaaaaaaaa</p>
-            <p>aaaaaaaaaaaaaaaaaa</p>
-            <p>aaaaaaaaaaaaaaaaaa</p>
-            <p>aaaaaaaaaaaaaaaaaa</p>
-        </div>
+        return h(Layout)
     }
 });

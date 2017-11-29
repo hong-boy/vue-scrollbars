@@ -21,10 +21,25 @@ export default {
                 el.style[property] = styles[property];
         }
     },
+    attr(el, name, value){
+        if (typeof name === 'string' && typeof value === 'undefined') {
+            // get attr
+            return el.getAttribute(name)
+        }
+        if (typeof name === 'string') {
+            el.setAttribute(name, value);
+        } else {
+            let attrs = name;
+            Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key]));
+        }
+    },
     addClass(el, className){
+        if (!className) {
+            return;
+        }
         if (el.classList) {
             el.classList.add(className);
-        } else if (!util.hasClass(el, className)) {
+        } else if (!this.hasClass(el, className)) {
             el.className += ' ' + className;
         }
     },
@@ -32,11 +47,7 @@ export default {
         return el.classList ? el.classList.contains(className) : new RegExp('\\b' + className + '\\b').test(el.className);
     },
     removeClass(el, className) {
-        if (el.classList) {
-            el.classList.remove(className);
-        } else {
-            el.className = el.className.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
-        }
+        el.className = el.className.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
     },
     addEvent(el, type, handler) {
         if (el.attachEvent) el.attachEvent('on' + type, handler); else el.addEventListener(type, handler);
@@ -89,6 +100,31 @@ export default {
             e.eventType = type;
             el.fireEvent('on' + e.eventType, e);
         }
+    },
+    isVisible(el){
+        let display = this.css(el, 'display');
+        let visibility = this.css(el, 'visibility');
+        let tagName = el.tagName.toLowerCase();
+        if ((el.clientHeight == 0 && el.clientWidth == 0)
+            || display === 'none'
+            || visibility === 'hidden'
+            || (tagName === 'input' && this.attr('type') === 'hidden')) {
+            return false;
+        }
+        if (tagName === 'body') {
+            return !((el.clientHeight == 0 && el.clientWidth == 0)
+            || display === 'none'
+            || visibility === 'hidden');
+        }
+        return this.isVisible(el.parentNode);
+    },
+    insertBefore(newNode, referredNode){
+        let parent = referredNode.parentNode;
+        return parent.insertBefore(newNode, referredNode);
+    },
+    cancelBubble(e){
+        e.preventDefault();
+        e.stopPropagation && e.stopPropagation();
+        e.cancelBubble && (e.cancelBubble = true);
     }
-
 }
