@@ -1,14 +1,15 @@
 'use strict';
 import Vue from 'vue';
-import $ from 'jquery';
 import scroll from './scrollbars/directive.js'
+import Scrollbar from './scrollbars/component.vue'
 import Layout from './layout.vue'
 import 'normalize.css'
-import './scrollbars/scrollbar.css'
+import './scrollbars/css/base.css'
+import './scrollbars/css/simple-outer.css'
+import './scrollbars/css/simple-inner.css'
 
 Vue.use(scroll);
-
-window.$ = $;
+Vue.component(Scrollbar.name, Scrollbar);
 
 new Vue({
     el: '#layout',

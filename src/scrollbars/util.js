@@ -126,5 +126,61 @@ export default {
         e.preventDefault();
         e.stopPropagation && e.stopPropagation();
         e.cancelBubble && (e.cancelBubble = true);
-    }
+    },
+    scrollTop(el, pos, cb){
+        let attr = 'scrollTop';
+        if (typeof pos === 'undefined' && typeof duration === 'undefined') {
+            return el[attr];
+        }
+        if (typeof pos === 'undefined') {
+            throw `Illegal argument: pos[${pos}]`;
+        }
+        let original = el[attr];
+        let distance = original - pos;
+        let step = distance / 15;
+        let id = null;
+
+        function fn() {
+            let scrollPos = el[attr];
+            el[attr] = original = (scrollPos - step);
+
+            if ((distance > 0 && original > pos)
+                || (distance < 0 && original < pos)) {
+                id = window.requestAnimationFrame(fn);
+            } else {
+                (typeof cb === 'function') && (cb(el));
+                window.cancelAnimationFrame(id);
+            }
+        }
+
+        id = window.requestAnimationFrame(fn);
+    },
+    scrollLeft(el, pos, cb){
+        let attr = 'scrollLeft';
+        if (typeof pos === 'undefined' && typeof duration === 'undefined') {
+            return el[attr];
+        }
+        if (typeof pos === 'undefined') {
+            throw `Illegal argument: pos[${pos}]`;
+        }
+        let original = el[attr];
+        let distance = original - pos;
+        let step = distance / 15;
+        let id = null;
+
+        function fn() {
+            let scrollPos = el[attr];
+            el[attr] = original = (scrollPos - step);
+
+            if ((distance > 0 && original > pos)
+                || (distance < 0 && original < pos)) {
+                id = window.requestAnimationFrame(fn);
+            } else {
+                (typeof cb === 'function') && (cb(el));
+                window.cancelAnimationFrame(id);
+            }
+        }
+
+        id = window.requestAnimationFrame(fn);
+    },
 }
