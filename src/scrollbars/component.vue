@@ -34,9 +34,9 @@
         created() {
             this.$nextTick(function () {
                 let self = this;
+                console.log(this);
                 let el = this.$slots.content[0].elm;
-                let inst = new Scrollbar(el, this.$el);
-                this.__inst4scrollbar = inst;
+                let pageMap = this.$slots.pageMap[0].elm;
 
                 let option = {
                     disableBodyScroll: this.disableBodyScroll,
@@ -70,12 +70,13 @@
                 option.onDestroy = function (...args) {
                     self.$emit('onDestroy', args);
                 };
+                if (pageMap) {
+                    option.scrollx = pageMap;
+                    option.scrolly = pageMap;
+                }
+                let inst = new Scrollbar(el, this.$el);
+                this.__inst4scrollbar = inst;
                 inst.init(option);
-
-//                setTimeout(function () {
-//                    console.log('inst.destroy()...');
-//                    inst.destroy();
-//                }.bind(this), 10000);
             });
         },
         mounted() {
