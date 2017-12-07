@@ -18,7 +18,8 @@ module.exports = {
         rules: [
             {test: /\.vue$/, use: ['vue-loader']},
             {test: /\.js$/, use: ['babel-loader'], exclude: /node_modules/},
-            {test: /\.(css|less)$/, use: ['style-loader', 'css-loader', 'less-loader']}
+            {test: /\.(css|less)$/, use: ['style-loader', 'css-loader', 'less-loader']},
+            {test: /\.(jpg|png)$/, use: ['file-loader']}
         ]
     },
     devServer: {

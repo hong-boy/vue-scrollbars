@@ -13,7 +13,7 @@ const BROWSER = {
     mobile: /android|webos|iphone|ipad|ipod|blackberry/i.test(navigator.userAgent),
     overlay: null, // check if browser overlays scrollbar which means the scrollbars totally floated
     scroll: null, // restore browser scrollbar size info:scrollbar size
-    scrolls: [], // restore mutiple instance of Scrollbar
+    scrolls: new Set(), // restore mutiple instance of Scrollbar
     webkit: /webkit/i.test(navigator.userAgent) && !/edge\/\d+/i.test(navigator.userAgent)
 };
 
@@ -221,7 +221,15 @@ let util = Object.assign(common, {
         inst._handlers.forEach(bean => {
             util.removeEvent(bean.element, bean.eventName, bean.handler);
         });
-    }
+    },
+    storeScrollHandlers(inst, eventName, element, handler){
+        inst._disabledScrollHandlers.add({eventName, element, handler});
+    },
+    removeScrollHanlders(inst){
+        inst._disabledScrollHandlers.forEach(bean => {
+            util.removeEvent(bean.element, bean.eventName, bean.handler);
+        });
+    },
 });
 
 /**
@@ -243,7 +251,7 @@ let updateScrollbars = (function () {
                     || wrapper.clientWidth != scrollx.visible
                     || wrapper.clientHeight != scrolly.visible
                 ))) {
-                inst.init();
+                inst.update();
             }
         });
         clearTimeout(timer);
@@ -252,14 +260,23 @@ let updateScrollbars = (function () {
 })();
 
 export default class Scrollbar {
-    constructor(el) {
+    constructor(el, wrapper) {
+        this.el = this.container = el;
+        this.ns = `.scrollbar_${BROWSER.data.index++}`;
+        this._originalWrapper = wrapper;
+        this.options = null;
+        this.scrollx = {}; // horizional bar
+        this.scrolly = {}; // vertical bar
+        this._handlers = new Set(); // restore event handlers which would be removed on destroy
+        this._disabledScrollHandlers = new Set();
+        el.__instance = this;
         if (!BROWSER.scroll) {
             BROWSER.overlay = util.isScrollOverlaysContent();
             BROWSER.scroll = util.getBrowserScrollSize();
             // monit scrollbar size changed
             updateScrollbars();
             // add global resize listener
-            util.addEvent(window, 'resize', util.throttle(function (e) {
+            let resize = util.throttle(function (e) {
                 let force = false;
                 if (BROWSER.scroll && (BROWSER.scroll.height || BROWSER.scroll.width)) {
                     let currentScroll = util.getBrowserScrollSize();
@@ -269,18 +286,179 @@ export default class Scrollbar {
                     }
                 }
                 updateScrollbars(force);
-            }));
-
+            });
+            util.addEvent(window, 'resize', resize);
+            util.storeHandlers(this, 'resize', window, resize);
         }
-        this.el = el;
-        this.ns = `.scrollbar_${BROWSER.data.index++}`;
-        this.options = null;
-        this.scrollx = {}; // horizional bar
-        this.scrolly = {}; // vertical bar
-        this._handlers = new Set(); // restore event handlers which would be removed on destroy
-        el.__instance = this;
-        BROWSER.scrolls.push(this);
+        BROWSER.scrolls.add(this);
     }
+
+    // init_bak(options) {
+    //     let self = this;
+    //     let el = self.el;
+    //     let cw = self.containerWrapper || el;
+    //     let wrapper = self.wrapper;
+    //     let bar = {x: self.scrollx, y: self.scrolly};
+    //     let initScroll = {
+    //         scrollLeft: self.el.scrollLeft,
+    //         scrollTop: self.el.scrollTop,
+    //     };
+    //     options = self.options = Object.assign({}, DEFAULTS, options);
+    //     if (!wrapper) {
+    //         // first init
+    //         // render dom structure
+    //         wrapper = self.wrapper = document.createElement('div');
+    //         ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach(className => {
+    //             util.addClass(wrapper, className);
+    //         });
+    //         util.css(wrapper, {
+    //             position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative'
+    //         });
+    //         util.insertBefore(wrapper, el).appendChild(el);
+    //
+    //         if (options.isRTL) {
+    //             util.addClass(wrapper, 'scroll--rtl')
+    //         }
+    //
+    //         // check if textarea
+    //         if (el.tagName.toLowerCase() === 'textarea') {
+    //             cw = self.containerWrapper = document.createElement('div');
+    //             util.insertBefore(cw, el).appendChild(el);
+    //             util.addClass(wrapper, 'scroll-textarea');
+    //         }
+    //
+    //         let css = {
+    //             height: 'auto',
+    //             "max-height": "",
+    //             "margin-bottom": `${BROWSER.data.height * -1}px`
+    //         };
+    //         css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
+    //         util.addClass(cw, 'scroll-content');
+    //         util.css(cw, css);
+    //
+    //         // scroll on el
+    //         function scroll4el(e) {
+    //             let scrollLeft = self.el.scrollLeft;
+    //             let scrollTop = self.el.scrollTop;
+    //             if (options.isRtl) {
+    //                 // webkit   0:100
+    //                 // ie/edge  100:0
+    //                 // firefox -100:0
+    //                 switch (true) {
+    //                     case BROWSER.firefox:
+    //                         scrollLeft = Math.abs(scrollLeft);
+    //                     case BROWSER.msedge || BROWSER.msie:
+    //                         scrollLeft = self.el.scrollWidth - self.el.clientWidth - scrollLeft;
+    //                         break;
+    //                 }
+    //             }
+    //             // onScroll handler
+    //             if (typeof options.onScroll === 'function') {
+    //                 options.onScroll.call(self, {
+    //                     maxScroll: bar.y.maxScrollOffset,
+    //                     scroll: scrollTop,
+    //                     size: bar.y.size,
+    //                     visible: bar.y.visible
+    //                 }, {
+    //                     maxScroll: bar.x.maxScrollOffset,
+    //                     scroll: scrollLeft,
+    //                     size: bar.x.size,
+    //                     visible: bar.x.visible
+    //                 });
+    //             }
+    //             bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
+    //             bar.y.isVisible && (util.css(bar.y.scroll.bar, 'top', `${scrollTop * bar.y.ratio}px`));
+    //         }
+    //
+    //         util.addEvent(el, 'scroll', scroll4el);
+    //         util.storeHandlers(self, 'scroll', el, scroll4el);
+    //         // prevent native scrollbars to be visible on #anchor click
+    //         function scroll4wrapper(e) {
+    //             wrapper.scrollTop = 0;
+    //             wrapper.scrollLeft = 0;
+    //         }
+    //
+    //         util.addEvent(wrapper, 'scroll', scroll4wrapper);
+    //         util.storeHandlers(self, 'scroll', wrapper, scroll4wrapper);
+    //         // if need disable body scroll
+    //         if (options.disableBodyScroll) {
+    //             var handleMouseScroll = function (event) {
+    //                 util.isVerticalScroll(event) ?
+    //                     bar.y.isVisible && bar.y.mousewheel(event) :
+    //                     bar.x.isVisible && bar.x.mousewheel(event);
+    //             };
+    //
+    //             util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
+    //             util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
+    //             util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+    //             util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
+    //
+    //             if (BROWSER.mobile) {
+    //                 function touchstart4wrapper(e) {
+    //                     let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
+    //                     let originalTouch = {
+    //                         pageX: touch.pageX,
+    //                         pageY: touch.pageY
+    //                     };
+    //                     let originalScroll = {
+    //                         left: touch.scrollLeft,
+    //                         top: touch.scrollTop
+    //                     };
+    //                     // touchmove
+    //                     function touchmove4doc(e) {
+    //                         let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
+    //                         el.scrollLeft = originalTouch.pageX + originalScroll.left - touch.pageX;
+    //                         el.scrollTop = originalTouch.pageY + originalScroll.top - touch.pageY;
+    //                         e.preventDefault();
+    //                     }
+    //
+    //                     util.addEvent(document, 'touchmove', touchmove4doc);
+    //                     // touchend
+    //                     function touchend4doc(e) {
+    //                         util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
+    //                         util.removeEvent(document, 'touchmove', touchmove4doc);
+    //                         util.removeEvent(document, 'touchend', touchend4doc);
+    //                     }
+    //
+    //                     util.addEvent(document, 'touchend', touchend4doc);
+    //                 }
+    //
+    //                 util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
+    //                 util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+    //             }
+    //         }
+    //         if (typeof options.onInit === 'function') {
+    //             options.onInit.call(this, el);
+    //         }
+    //     } else {
+    //         // update
+    //         let css = {
+    //             height: 'auto',
+    //             "max-height": "",
+    //             "margin-bottom": `${BROWSER.data.height * -1}px`
+    //         };
+    //         css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
+    //         util.css(cw, css);
+    //     }
+    //     //初始化滚动条（绘制滚动条DOM结构，并计算大小）
+    //     self._renderBars(bar);
+    //     // reset styles
+    //     self._reset4BarCSS(bar);
+    //     // calc init sizes
+    //     self._calcInitSize4Bars(bar);
+    //     // update scrollbar visibility/dimensions
+    //     self._updateScroll('x', self.scrollx);
+    //     self._updateScroll('y', self.scrolly);
+    //     if (typeof options.onUpdate === 'function') {
+    //         options.onUpdate.apply(this, [self.el]);
+    //     }
+    //     // calc scrollbar size
+    //     self._calcSize4Bars(bar);
+    //
+    //     self.el.scrollLeft = initScroll.scrollLeft;
+    //     self.el.scrollTop = initScroll.scrollTop;
+    //     util.trigger(self.el, 'scroll');
+    // }
 
     init(options) {
         let self = this;
@@ -292,144 +470,139 @@ export default class Scrollbar {
             scrollLeft: self.el.scrollLeft,
             scrollTop: self.el.scrollTop,
         };
-        options = self.options = Object.assign({}, DEFAULTS, options);
-        if (!wrapper) {
-            // first init
-            // render dom structure
-            wrapper = self.wrapper = document.createElement('div');
-            ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach(className => {
-                util.addClass(wrapper, className);
-            });
-            util.css(wrapper, {
-                position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative'
-            });
-            util.insertBefore(wrapper, el).appendChild(el);
+        options = self.options = util.extend(true, {}, DEFAULTS, options);
+        // first init
+        // render dom structure
+        wrapper = self.wrapper = self._originalWrapper || document.createElement('div');
+        ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach(className => util.addClass(wrapper, className));
+        util.css(wrapper, {
+            position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative'
+        });
+        !self._originalWrapper && util.insertBefore(wrapper, el).appendChild(el);
 
-            if (options.isRTL) {
-                util.addClass(wrapper, 'scroll--rtl')
-            }
-
-            // check if textarea
-            if (el.tagName.toLowerCase() === 'textarea') {
-                cw = self.containerWrapper = document.createElement('div');
-                util.insertBefore(cw, el).appendChild(el);
-                util.addClass(wrapper, 'scroll-textarea');
-            }
-
-            let css = {
-                height: 'auto',
-                "max-height": "",
-                "margin-bottom": `${BROWSER.data.height * -1}px`
-            };
-            css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
-            util.addClass(cw, 'scroll-content');
-            util.css(cw, css);
-
-            // scroll on el
-            function scroll4el(e) {
-                let scrollLeft = self.el.scrollLeft;
-                let scrollTop = self.el.scrollTop;
-                if (options.isRtl) {
-                    // webkit   0:100
-                    // ie/edge  100:0
-                    // firefox -100:0
-                    switch (true) {
-                        case BROWSER.firefox:
-                            scrollLeft = Math.abs(scrollLeft);
-                        case BROWSER.msedge || BROWSER.msie:
-                            scrollLeft = self.el.scrollWidth - self.el.clientWidth - scrollLeft;
-                            break;
-                    }
-                }
-                // onScroll handler
-                if (typeof options.onScroll === 'function') {
-                    options.onScroll.call(self, {
-                        maxScroll: bar.y.maxScrollOffset,
-                        scroll: scrollTop,
-                        size: bar.y.size,
-                        visible: bar.y.visible
-                    }, {
-                        maxScroll: bar.x.maxScrollOffset,
-                        scroll: scrollLeft,
-                        size: bar.x.size,
-                        visible: bar.x.visible
-                    });
-                }
-                bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
-                bar.y.isVisible && (util.css(bar.y.scroll.bar, 'top', `${scrollTop * bar.y.ratio}px`));
-            }
-
-            util.addEvent(el, 'scroll', scroll4el);
-            util.storeHandlers(self, 'scroll', el, scroll4el);
-            // prevent native scrollbars to be visible on #anchor click
-            function scroll4wrapper(e) {
-                wrapper.scrollTop = 0;
-                wrapper.scrollLeft = 0;
-            }
-
-            util.addEvent(wrapper, 'scroll', scroll4wrapper);
-            util.storeHandlers(self, 'scroll', wrapper, scroll4wrapper);
-            // if need disable body scroll
-            if (options.disableBodyScroll) {
-                var handleMouseScroll = function (event) {
-                    util.isVerticalScroll(event) ?
-                        bar.y.isVisible && bar.y.mousewheel(event) :
-                        bar.x.isVisible && bar.x.mousewheel(event);
-                };
-
-                util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
-                util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
-                util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
-                util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
-
-                if (BROWSER.mobile) {
-                    function touchstart4wrapper(e) {
-                        let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
-                        let originalTouch = {
-                            pageX: touch.pageX,
-                            pageY: touch.pageY
-                        };
-                        let originalScroll = {
-                            left: touch.scrollLeft,
-                            top: touch.scrollTop
-                        };
-                        // touchmove
-                        function touchmove4doc(e) {
-                            let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
-                            el.scrollLeft = originalTouch.pageX + originalScroll.left - touch.pageX;
-                            el.scrollTop = originalTouch.pageY + originalScroll.top - touch.pageY;
-                            e.preventDefault();
-                        }
-
-                        util.addEvent(document, 'touchmove', touchmove4doc);
-                        // touchend
-                        function touchend4doc(e) {
-                            util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
-                            util.removeEvent(document, 'touchmove', touchmove4doc);
-                            util.removeEvent(document, 'touchend', touchend4doc);
-                        }
-
-                        util.addEvent(document, 'touchend', touchend4doc);
-                    }
-
-                    util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
-                    util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
-                }
-            }
-            if (typeof options.onInit === 'function') {
-                options.onInit.call(this, el);
-            }
-        } else {
-            // update
-            let css = {
-                height: 'auto',
-                "max-height": "",
-                "margin-bottom": `${BROWSER.data.height * -1}px`
-            };
-            css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
-            util.css(cw, css);
+        if (options.isRTL) {
+            util.addClass(wrapper, 'scroll--rtl');
         }
-        //初始化滚动条（绘制滚动条DOM结构，并计算大小）
+
+        // check if textarea
+        if (el.tagName.toLowerCase() === 'textarea') {
+            cw = self.containerWrapper = document.createElement('div');
+            util.insertBefore(cw, el).appendChild(el);
+            util.addClass(wrapper, 'scroll-textarea');
+        }
+
+        let css = {
+            height: 'auto',
+            "max-height": "",
+            "margin-bottom": `${BROWSER.data.height * -1}px`
+        };
+        css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
+        util.addClass(cw, 'scroll-content');
+        util.css(cw, css);
+
+        // scroll on el
+        function scroll4el(e) {
+            let scrollLeft = self.el.scrollLeft;
+            let scrollTop = self.el.scrollTop;
+            if (options.isRtl) {
+                // webkit   0:100
+                // ie/edge  100:0
+                // firefox -100:0
+                switch (true) {
+                    case BROWSER.firefox:
+                        scrollLeft = Math.abs(scrollLeft);
+                    case BROWSER.msedge || BROWSER.msie:
+                        scrollLeft = self.el.scrollWidth - self.el.clientWidth - scrollLeft;
+                        break;
+                }
+            }
+            // onScroll handler
+            if (typeof options.onScroll === 'function') {
+                options.onScroll.call(self, {
+                    maxScroll: bar.y.maxScrollOffset,
+                    scroll: scrollTop,
+                    size: bar.y.size,
+                    visible: bar.y.visible
+                }, {
+                    maxScroll: bar.x.maxScrollOffset,
+                    scroll: scrollLeft,
+                    size: bar.x.size,
+                    visible: bar.x.visible
+                });
+            }
+            bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
+            bar.y.isVisible && (util.css(bar.y.scroll.bar, 'top', `${scrollTop * bar.y.ratio}px`));
+        }
+
+        util.addEvent(el, 'scroll', scroll4el);
+        util.storeHandlers(self, 'scroll', el, scroll4el);
+
+        // prevent native scrollbars to be visible on #anchor click
+        function scroll4wrapper(e) {
+            wrapper.scrollTop = 0;
+            wrapper.scrollLeft = 0;
+        }
+
+        util.addEvent(wrapper, 'scroll', scroll4wrapper);
+        util.storeHandlers(self, 'scroll', wrapper, scroll4wrapper);
+
+        // if need disable body scroll
+        if (options.disableBodyScroll) {
+            var handleMouseScroll = function (event) {
+                util.isVerticalScroll(event) ?
+                    bar.y.isVisible && bar.y.mousewheel(event) :
+                    bar.x.isVisible && bar.x.mousewheel(event);
+            };
+
+            util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
+            util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
+            util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+            util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
+            util.storeScrollHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+            util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
+
+            if (BROWSER.mobile) {
+                function touchstart4wrapper(e) {
+                    let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
+                    let originalTouch = {
+                        pageX: touch.pageX,
+                        pageY: touch.pageY
+                    };
+                    let originalScroll = {
+                        left: touch.scrollLeft,
+                        top: touch.scrollTop
+                    };
+                    // touchmove
+                    function touchmove4doc(e) {
+                        let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
+                        el.scrollLeft = originalTouch.pageX + originalScroll.left - touch.pageX;
+                        el.scrollTop = originalTouch.pageY + originalScroll.top - touch.pageY;
+                        e.preventDefault();
+                    }
+
+                    util.addEvent(document, 'touchmove', touchmove4doc);
+                    // touchend
+                    function touchend4doc(e) {
+                        util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
+                        util.removeEvent(document, 'touchmove', touchmove4doc);
+                        util.removeEvent(document, 'touchend', touchend4doc);
+                    }
+
+                    util.addEvent(document, 'touchend', touchend4doc);
+                }
+
+                util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
+                util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+                util.storeScrollHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+            }
+        }
+
+        // callback for init
+        if (typeof options.onInit === 'function') {
+            options.onInit.call(self, el);
+        }
+
+        // render bars
         self._renderBars(bar);
         // reset styles
         self._reset4BarCSS(bar);
@@ -439,13 +612,106 @@ export default class Scrollbar {
         self._updateScroll('x', self.scrollx);
         self._updateScroll('y', self.scrolly);
         if (typeof options.onUpdate === 'function') {
-            options.onUpdate.apply(this, [self.el]);
+            options.onUpdate.apply(self, [self.el]);
         }
         // calc scrollbar size
         self._calcSize4Bars(bar);
 
-        self.el.scrollLeft = initScroll.scrollLeft;
-        self.el.scrollTop = initScroll.scrollTop;
+        util.scrollLeft(self.el, initScroll.scrollLeft);
+        util.scrollTop(self.el, initScroll.scrollTop);
+        util.trigger(self.el, 'scroll');
+    }
+
+    update(options) {
+        let self = this;
+        let original = self.options;
+        options = self.options = util.extend(true, {}, original, options);
+        let bar = {x: self.scrollx, y: self.scrolly};
+        let initScroll = {
+            scrollLeft: self.el.scrollLeft,
+            scrollTop: self.el.scrollTop,
+        };
+        let css = {
+            height: 'auto',
+            "max-height": "",
+            "margin-bottom": `${BROWSER.data.height * -1}px`
+        };
+        css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
+        util.css(self.containerWrapper || self.el, css);
+
+        // if need disable body scroll
+        if (options.disableBodyScroll && !original.disableBodyScroll) {
+            // add listener
+            let wrapper = self.wrapper;
+            var handleMouseScroll = function (event) {
+                util.isVerticalScroll(event) ?
+                    bar.y.isVisible && bar.y.mousewheel(event) :
+                    bar.x.isVisible && bar.x.mousewheel(event);
+            };
+
+            util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
+            util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
+            util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+            util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
+            util.storeScrollHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+            util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
+
+            if (BROWSER.mobile) {
+                function touchstart4wrapper(e) {
+                    let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
+                    let originalTouch = {
+                        pageX: touch.pageX,
+                        pageY: touch.pageY
+                    };
+                    let originalScroll = {
+                        left: touch.scrollLeft,
+                        top: touch.scrollTop
+                    };
+                    // touchmove
+                    function touchmove4doc(e) {
+                        let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
+                        el.scrollLeft = originalTouch.pageX + originalScroll.left - touch.pageX;
+                        el.scrollTop = originalTouch.pageY + originalScroll.top - touch.pageY;
+                        e.preventDefault();
+                    }
+
+                    util.addEvent(document, 'touchmove', touchmove4doc);
+                    // touchend
+                    function touchend4doc(e) {
+                        util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
+                        util.removeEvent(document, 'touchmove', touchmove4doc);
+                        util.removeEvent(document, 'touchend', touchend4doc);
+                    }
+
+                    util.addEvent(document, 'touchend', touchend4doc);
+                }
+
+                util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
+                util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+                util.storeScrollHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+            }
+        } else if (!options.disableBodyScroll && original.disableBodyScroll) {
+            // remove listener
+            util.removeScrollHanlders(self);
+        }
+
+        // render bars
+        self._renderBars(bar);
+        // reset styles
+        self._reset4BarCSS(bar);
+        // calc init sizes
+        self._calcInitSize4Bars(bar);
+        // update scrollbar visibility/dimensions
+        self._updateScroll('x', self.scrollx);
+        self._updateScroll('y', self.scrolly);
+        if (typeof options.onUpdate === 'function') {
+            options.onUpdate.apply(self, [self.el]);
+        }
+        // calc scrollbar size
+        self._calcSize4Bars(bar);
+
+        util.scrollLeft(self.el, initScroll.scrollLeft);
+        util.scrollTop(self.el, initScroll.scrollTop);
         util.trigger(self.el, 'scroll');
     }
 
@@ -455,12 +721,12 @@ export default class Scrollbar {
             return;
         }
         delete self.el.__instance;
-        BROWSER.scrolls.remove(self);
+        BROWSER.scrolls.delete(self);
         //remove listeners
         util.removeHanlders(self);
         delete self._handlers;
         // restore DOM structure
-        self.el.insertBefore(self.wrapper);
+        util.insertBefore(self.el, self.wrapper);
         util.css(self.el, {
             "height": "",
             "margin": "",
@@ -472,7 +738,9 @@ export default class Scrollbar {
         util.removeClass(self.scrollx.scroll, 'scroll-scrollx_visible');
         util.removeClass(self.scrolly.scroll, 'scroll-scrolly_visible');
 
-        self.wrapper.remove();
+        if (!self._originalWrapper) {
+            self.wrapper.remove();
+        }
 
         // onDestroy handler
         if (typeof self.options.onDestroy === 'function') {

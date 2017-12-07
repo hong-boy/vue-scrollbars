@@ -3,7 +3,6 @@ import Scrollbar from './scrollbar'
 // 指令名称
 const NAME = 'bar';
 
-// expose to Vue.use()
 export default function install(Vue, options) {
     if (new Vue().$isServer) {
         throw 'Not support SSR!'
@@ -25,7 +24,7 @@ export default function install(Vue, options) {
                 let modifier = binding.modifiers;
                 let option = binding.value;
                 option = Object.assign({}, modifier, option);
-                inst.init(option);
+                inst.update(option);
             }
         },
         unbind (el, binding, vnode) {

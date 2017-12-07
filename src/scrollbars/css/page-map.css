@@ -1,0 +1,33 @@
+/******************* PAGE THUMBNAIL SCROLLBAR *******************/
+
+.scrollbar-map > .scroll-element_outer{
+    display:none;
+    height:100px;
+    position:absolute;
+    right:10px;
+    top:10px;
+    width:100px;
+}
+.scrollbar-map > .scroll-element_outer .scroll-element_size,
+.scrollbar-map > .scroll-element_outer .scroll-element_track{
+    background-color:#999;
+    background-color:rgba(153, 153, 153, 0.4);
+    height:100%;
+    position:absolute;
+    right:0;
+    top:0;
+    width:100%;
+}
+.scrollbar-map > .scroll-element_outer .scroll-bar{
+    background-color:#CCC;
+    background-color:rgba(204, 204, 204, 0.5);
+    height:100%;
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+}
+.scrollbar-map > .scroll-element_outer.scroll-scrollx_visible,
+.scrollbar-map > .scroll-element_outer.scroll-scrolly_visible{
+    display:block;
+}
