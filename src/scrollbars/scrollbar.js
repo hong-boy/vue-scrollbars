@@ -903,6 +903,9 @@ export default class Scrollbar {
 
             item.mousewheel = function (e) {
                 if (!item.isVisible || (key === 'x' && util.isVerticalScroll(e))) {
+                    return true;
+                }
+                if (key === 'y' && !util.isVerticalScroll(e)) {
                     bar.x.mousewheel(e);
                     return;
                 }

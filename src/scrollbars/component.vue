@@ -34,9 +34,7 @@
         created() {
             this.$nextTick(function () {
                 let self = this;
-                console.log(this);
                 let el = this.$slots.content[0].elm;
-                let pageMap = this.$slots.pageMap[0].elm;
 
                 let option = {
                     disableBodyScroll: this.disableBodyScroll,
@@ -70,9 +68,11 @@
                 option.onDestroy = function (...args) {
                     self.$emit('onDestroy', args);
                 };
+                let pageMap = this.$slots.pageMap ? this.$slots.pageMap[0].elm : null;
                 if (pageMap) {
                     option.scrollx = pageMap;
                     option.scrolly = pageMap;
+                    option.stepScrolling = false;
                 }
                 let inst = new Scrollbar(el, this.$el);
                 this.__inst4scrollbar = inst;
@@ -91,14 +91,8 @@
                 ignoreOverlay: this.ignoreOverlay,
                 isRtl: this.isRtl,
                 showArrows: this.showArrows,
-                stepScrolling: this.stepScrolling,
                 duration: this.duration,
-                scrollStep: this.scrollStep,
-//                onDestroy: this.onDestroy,
-//                onFallback: this.onFallback,
-//                onInit: this.onInit,
-//                onScroll: this.onScroll,
-//                onUpdate: this.onUpdate,
+                scrollStep: this.scrollStep
             };
             this.__inst4scrollbar.update(option);
         },

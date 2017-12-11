@@ -84,16 +84,16 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, susc
         </section>
         <section class="section">
             <h3>Demo - page map</h3>
-            <scrollbar :stepScrolling="false" @onInit="onInit4PageMap" @onUpdate="onUpdate4PageMap">
+            <scrollbar @onInit="onInit4PageMap" @onUpdate="onUpdate4PageMap">
                 <div slot="pageMap" class="scroll-element_outer">
                     <div class="scroll-element_size">
                         <div class="scroll-element_track"></div>
                         <div class="scroll-bar"></div>
                     </div>
                 </div>
-                <section slot="content" class="scrollbar-map">
+                <div slot="content" class="scrollbar-map panel">
                     <img src="./tarzan.jpg" height="900" width="1200"/>
-                </section>
+                </div>
             </scrollbar>
         </section>
     </div>
@@ -117,7 +117,10 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, susc
             },
         },
         created(){
-//            setTimeout(()=>{console.log('disabled scroll');this.disableBodyScroll = true}, 10000);
+            setTimeout(() => {
+                console.log('disabled scroll');
+                this.disableBodyScroll = true
+            }, 10000);
         }
     }
 </script>
@@ -152,9 +155,13 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, susc
     }
     }
     .panel{
-        padding:5px;
         position:relative;
+        padding:5px;
         width:100%;
         max-height:300px;
+    &
+    .scrollbar-map{
+        width:300px;
+    }
     }
 </style>
