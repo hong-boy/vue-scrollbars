@@ -183,6 +183,7 @@ let util = Object.assign(common, {
             BROWSER.data.outer = document.createElement('div');
             util.css(BROWSER.data.outer, outerCSS);
             BROWSER.data.outer.appendChild(BROWSER.data.inner);
+            BROWSER.body = BROWSER.body || document.querySelector('body');
             BROWSER.body.appendChild(BROWSER.data.outer);
         }
 

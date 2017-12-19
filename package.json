@@ -1,8 +1,8 @@
 {
     "name":"vue-scrollbars",
-    "version":"1.0.0",
-    "description":"A light scrollbar add-on based on Vue2",
-    "main":"dist/build.js",
+    "version":"1.0.3",
+    "description":"A light vue scrollbar comes from jquery.scrollbar.js",
+    "main":"dist/bundle.js",
     "scripts":{
         "dev":"cross-env NODE_ENV=development node_modules/.bin/webpack-dev-server --config config/webpack.config.js",
         "build":"cross-env NODE_ENV=production node_modules/.bin/webpack --config config/webpack.prod.js",
@@ -31,6 +31,8 @@
         "babel-preset-env":"^1.6.1",
         "cross-env":"^5.1.1",
         "css-loader":"^0.28.7",
+        "extract-text-webpack-plugin":"^3.0.2",
+        "file-loader":"^1.1.6",
         "hot-module-replacement":"^3.0.0",
         "html-webpack-plugin":"^2.30.1",
         "less":"^2.7.3",
@@ -44,5 +46,6 @@
         "webpack-dashboard":"^1.0.2",
         "webpack-dev-server":"^2.9.4"
     },
-    "dependencies":{}
+    "dependencies":{
+    }
 }
