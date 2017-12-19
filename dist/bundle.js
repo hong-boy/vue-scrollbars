@@ -188,7 +188,7 @@
                 onFallback: null, // callback function if scrollbar is not initialized
                 onInit: null, // callback function on first initialization
                 onScroll: null, // callback function on content scrolling
-                onUpdate: null //callback function on init/resize (before scrollbar size calculation
+                onUpdate: null // callback function on init/resize (before scrollbar size calculation
             };
 
             var BAR_TYPES = {
@@ -316,20 +316,20 @@
 
                     if (!BROWSER.data.outer) {
                         var css = {
-                            "border": "none",
-                            "box-sizing": "content-box",
-                            "height": "200px",
-                            "margin": "0",
-                            "padding": "0",
-                            "width": "200px"
+                            'border': 'none',
+                            'box-sizing': 'content-box',
+                            'height': '200px',
+                            'margin': '0',
+                            'padding': '0',
+                            'width': '200px'
                         };
                         BROWSER.data.inner = document.createElement('div');
                         util.css(BROWSER.data.inner, css);
                         var outerCSS = Object.assign({
-                            "left": "-1000px",
-                            "overflow": "scroll",
-                            "position": "absolute",
-                            "top": "-1000px"
+                            'left': '-1000px',
+                            'overflow': 'scroll',
+                            'position': 'absolute',
+                            'top': '-1000px'
                         }, css);
                         BROWSER.data.outer = document.createElement('div');
                         util.css(BROWSER.data.outer, outerCSS);
@@ -361,8 +361,12 @@
                 },
                 isVerticalScroll: function isVerticalScroll(event) {
                     var e = event;
-                    if (e.axis && e.axis === e.HORIZONTAL_AXIS) return false;
-                    if (e.wheelDeltaX) return false;
+                    if (e.axis && e.axis === e.HORIZONTAL_AXIS) {
+                        return false;
+                    }
+                    if (e.wheelDeltaX) {
+                        return false;
+                    }
                     return true;
                 },
                 storeHandlers: function storeHandlers(inst, eventName, element, handler) {
@@ -440,173 +444,6 @@
                     BROWSER.scrolls.add(this);
                 }
 
-                // init_bak(options) {
-                //     let self = this;
-                //     let el = self.el;
-                //     let cw = self.containerWrapper || el;
-                //     let wrapper = self.wrapper;
-                //     let bar = {x: self.scrollx, y: self.scrolly};
-                //     let initScroll = {
-                //         scrollLeft: self.el.scrollLeft,
-                //         scrollTop: self.el.scrollTop,
-                //     };
-                //     options = self.options = Object.assign({}, DEFAULTS, options);
-                //     if (!wrapper) {
-                //         // first init
-                //         // render dom structure
-                //         wrapper = self.wrapper = document.createElement('div');
-                //         ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach(className => {
-                //             util.addClass(wrapper, className);
-                //         });
-                //         util.css(wrapper, {
-                //             position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative'
-                //         });
-                //         util.insertBefore(wrapper, el).appendChild(el);
-                //
-                //         if (options.isRTL) {
-                //             util.addClass(wrapper, 'scroll--rtl')
-                //         }
-                //
-                //         // check if textarea
-                //         if (el.tagName.toLowerCase() === 'textarea') {
-                //             cw = self.containerWrapper = document.createElement('div');
-                //             util.insertBefore(cw, el).appendChild(el);
-                //             util.addClass(wrapper, 'scroll-textarea');
-                //         }
-                //
-                //         let css = {
-                //             height: 'auto',
-                //             "max-height": "",
-                //             "margin-bottom": `${BROWSER.data.height * -1}px`
-                //         };
-                //         css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
-                //         util.addClass(cw, 'scroll-content');
-                //         util.css(cw, css);
-                //
-                //         // scroll on el
-                //         function scroll4el(e) {
-                //             let scrollLeft = self.el.scrollLeft;
-                //             let scrollTop = self.el.scrollTop;
-                //             if (options.isRtl) {
-                //                 // webkit   0:100
-                //                 // ie/edge  100:0
-                //                 // firefox -100:0
-                //                 switch (true) {
-                //                     case BROWSER.firefox:
-                //                         scrollLeft = Math.abs(scrollLeft);
-                //                     case BROWSER.msedge || BROWSER.msie:
-                //                         scrollLeft = self.el.scrollWidth - self.el.clientWidth - scrollLeft;
-                //                         break;
-                //                 }
-                //             }
-                //             // onScroll handler
-                //             if (typeof options.onScroll === 'function') {
-                //                 options.onScroll.call(self, {
-                //                     maxScroll: bar.y.maxScrollOffset,
-                //                     scroll: scrollTop,
-                //                     size: bar.y.size,
-                //                     visible: bar.y.visible
-                //                 }, {
-                //                     maxScroll: bar.x.maxScrollOffset,
-                //                     scroll: scrollLeft,
-                //                     size: bar.x.size,
-                //                     visible: bar.x.visible
-                //                 });
-                //             }
-                //             bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
-                //             bar.y.isVisible && (util.css(bar.y.scroll.bar, 'top', `${scrollTop * bar.y.ratio}px`));
-                //         }
-                //
-                //         util.addEvent(el, 'scroll', scroll4el);
-                //         util.storeHandlers(self, 'scroll', el, scroll4el);
-                //         // prevent native scrollbars to be visible on #anchor click
-                //         function scroll4wrapper(e) {
-                //             wrapper.scrollTop = 0;
-                //             wrapper.scrollLeft = 0;
-                //         }
-                //
-                //         util.addEvent(wrapper, 'scroll', scroll4wrapper);
-                //         util.storeHandlers(self, 'scroll', wrapper, scroll4wrapper);
-                //         // if need disable body scroll
-                //         if (options.disableBodyScroll) {
-                //             var handleMouseScroll = function (event) {
-                //                 util.isVerticalScroll(event) ?
-                //                     bar.y.isVisible && bar.y.mousewheel(event) :
-                //                     bar.x.isVisible && bar.x.mousewheel(event);
-                //             };
-                //
-                //             util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
-                //             util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
-                //             util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
-                //             util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
-                //
-                //             if (BROWSER.mobile) {
-                //                 function touchstart4wrapper(e) {
-                //                     let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
-                //                     let originalTouch = {
-                //                         pageX: touch.pageX,
-                //                         pageY: touch.pageY
-                //                     };
-                //                     let originalScroll = {
-                //                         left: touch.scrollLeft,
-                //                         top: touch.scrollTop
-                //                     };
-                //                     // touchmove
-                //                     function touchmove4doc(e) {
-                //                         let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
-                //                         el.scrollLeft = originalTouch.pageX + originalScroll.left - touch.pageX;
-                //                         el.scrollTop = originalTouch.pageY + originalScroll.top - touch.pageY;
-                //                         e.preventDefault();
-                //                     }
-                //
-                //                     util.addEvent(document, 'touchmove', touchmove4doc);
-                //                     // touchend
-                //                     function touchend4doc(e) {
-                //                         util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
-                //                         util.removeEvent(document, 'touchmove', touchmove4doc);
-                //                         util.removeEvent(document, 'touchend', touchend4doc);
-                //                     }
-                //
-                //                     util.addEvent(document, 'touchend', touchend4doc);
-                //                 }
-                //
-                //                 util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
-                //                 util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
-                //             }
-                //         }
-                //         if (typeof options.onInit === 'function') {
-                //             options.onInit.call(this, el);
-                //         }
-                //     } else {
-                //         // update
-                //         let css = {
-                //             height: 'auto',
-                //             "max-height": "",
-                //             "margin-bottom": `${BROWSER.data.height * -1}px`
-                //         };
-                //         css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
-                //         util.css(cw, css);
-                //     }
-                //     //初始化滚动条（绘制滚动条DOM结构，并计算大小）
-                //     self._renderBars(bar);
-                //     // reset styles
-                //     self._reset4BarCSS(bar);
-                //     // calc init sizes
-                //     self._calcInitSize4Bars(bar);
-                //     // update scrollbar visibility/dimensions
-                //     self._updateScroll('x', self.scrollx);
-                //     self._updateScroll('y', self.scrolly);
-                //     if (typeof options.onUpdate === 'function') {
-                //         options.onUpdate.apply(this, [self.el]);
-                //     }
-                //     // calc scrollbar size
-                //     self._calcSize4Bars(bar);
-                //
-                //     self.el.scrollLeft = initScroll.scrollLeft;
-                //     self.el.scrollTop = initScroll.scrollTop;
-                //     util.trigger(self.el, 'scroll');
-                // }
-
                 _createClass(Scrollbar, [{
                     key: 'init',
                     value: function init(options) {
@@ -644,10 +481,10 @@
 
                         var css = {
                             height: 'auto',
-                            "max-height": "",
-                            "margin-bottom": BROWSER.data.height * -1 + 'px'
+                            'max-height': '',
+                            'margin-bottom': BROWSER.scroll.height * -1 + 'px'
                         };
-                        css[options.isRTL ? 'margin-right' : 'margin-left'] = BROWSER.data.width * -1 + 'px';
+                        css[options.isRTL ? 'margin-left' : 'margin-right'] = BROWSER.scroll.width * -1 + 'px';
                         util.addClass(cw, 'scroll-content');
                         util.css(cw, css);
 
@@ -711,7 +548,7 @@
                             util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
 
                             if (BROWSER.mobile) {
-                                var _touchstart4wrapper = function _touchstart4wrapper(e) {
+                                var touchstart4wrapper = function touchstart4wrapper(e) {
                                     var touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
                                     var originalTouch = {
                                         pageX: touch.pageX,
@@ -732,17 +569,16 @@
                                     util.addEvent(document, 'touchmove', touchmove4doc);
                                     // touchend
                                     function touchend4doc(e) {
-                                        util.removeEvent(wrapper, 'touchstart', _touchstart4wrapper);
+                                        util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
                                         util.removeEvent(document, 'touchmove', touchmove4doc);
                                         util.removeEvent(document, 'touchend', touchend4doc);
                                     }
 
                                     util.addEvent(document, 'touchend', touchend4doc);
                                 };
-
-                                util.addEvent(wrapper, 'touchstart', _touchstart4wrapper);
-                                util.storeHandlers(self, 'touchstart', wrapper, _touchstart4wrapper);
-                                util.storeScrollHandlers(self, 'touchstart', wrapper, _touchstart4wrapper);
+                                util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
+                                util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+                                util.storeScrollHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
                             }
                         }
 
@@ -783,10 +619,10 @@
                         };
                         var css = {
                             height: 'auto',
-                            "max-height": "",
-                            "margin-bottom": BROWSER.data.height * -1 + 'px'
+                            'max-height': '',
+                            'margin-bottom': BROWSER.scroll.height * -1 + 'px'
                         };
-                        css[options.isRTL ? 'margin-right' : 'margin-left'] = BROWSER.data.width * -1 + 'px';
+                        css[options.isRTL ? 'margin-left' : 'margin-right'] = BROWSER.scroll.width * -1 + 'px';
                         util.css(self.containerWrapper || self.el, css);
 
                         // if need disable body scroll
@@ -805,7 +641,7 @@
                             util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
 
                             if (BROWSER.mobile) {
-                                var _touchstart4wrapper2 = function _touchstart4wrapper2(e) {
+                                var touchstart4wrapper = function touchstart4wrapper(e) {
                                     var touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
                                     var originalTouch = {
                                         pageX: touch.pageX,
@@ -826,17 +662,16 @@
                                     util.addEvent(document, 'touchmove', touchmove4doc);
                                     // touchend
                                     function touchend4doc(e) {
-                                        util.removeEvent(wrapper, 'touchstart', _touchstart4wrapper2);
+                                        util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
                                         util.removeEvent(document, 'touchmove', touchmove4doc);
                                         util.removeEvent(document, 'touchend', touchend4doc);
                                     }
 
                                     util.addEvent(document, 'touchend', touchend4doc);
                                 };
-
-                                util.addEvent(wrapper, 'touchstart', _touchstart4wrapper2);
-                                util.storeHandlers(self, 'touchstart', wrapper, _touchstart4wrapper2);
-                                util.storeScrollHandlers(self, 'touchstart', wrapper, _touchstart4wrapper2);
+                                util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
+                                util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
+                                util.storeScrollHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
                             }
                         } else if (!options.disableBodyScroll && original.disableBodyScroll) {
                             // remove listener
@@ -871,15 +706,15 @@
                         }
                         delete self.el.__instance;
                         BROWSER.scrolls.delete(self);
-                        //remove listeners
+                        // remove listeners
                         util.removeHanlders(self);
                         delete self._handlers;
                         // restore DOM structure
                         util.insertBefore(self.el, self.wrapper);
                         util.css(self.el, {
-                            "height": "",
-                            "margin": "",
-                            "max-height": ""
+                            'height': '',
+                            'margin': '',
+                            'max-height': ''
                         });
                         'scroll-content scroll-scrollx_visible scroll-scrolly_visible'.split(/\s/).forEach(function (className) {
                             util.removeClass(self.el, className);
@@ -923,13 +758,13 @@
                         if (d === 'y') {
                             if (container.tagName.toLowerCase() === 'textarea' || AreaSize < AreaVisible) {
                                 util.css(containerWrapper, {
-                                    "height": AreaVisible + BROWSER.scroll.height + 'px',
-                                    "max-height": "none"
+                                    'height': AreaVisible + BROWSER.scroll.height + 'px',
+                                    'max-height': 'none'
                                 });
                             } else {
                                 util.css(containerWrapper, {
-                                    //"height": "auto", // do not reset height value: issue with height:100%!
-                                    "max-height": AreaVisible + BROWSER.scroll.height + 'px'
+                                    // "height": "auto", // do not reset height value: issue with height:100%!
+                                    'max-height': AreaVisible + BROWSER.scroll.height + 'px'
                                 });
                             }
                         }
@@ -956,7 +791,7 @@
                         Object.keys(bar).sort().forEach(function (key) {
                             var item = bar[key];
                             var scrollClass = 'scroll-scroll' + key + '_visible';
-                            var scrolly = key == "x" ? bar.y : bar.x;
+                            var scrolly = key == 'x' ? bar.y : bar.x;
 
                             util.removeClass(item.scroll, scrollClass);
                             util.removeClass(scrolly.scroll, scrollClass);
@@ -970,7 +805,7 @@
                         var self = this;
                         Object.keys(bar).sort().forEach(function (key) {
                             var item = bar[key];
-                            Object.assign(item, key == "x" ? {
+                            Object.assign(item, key == 'x' ? {
                                 offset: parseInt(util.css(self.el, 'left'), 10) || 0,
                                 size: self.el.scrollWidth,
                                 visible: self.wrapper.clientWidth
@@ -1035,8 +870,12 @@
                             var scrollTo = function scrollTo() {
                                 var currentOffset = self.el[offsetPos];
                                 self.el[offsetPos] = currentOffset + scrollStep;
-                                if (scrollForward == 1 && currentOffset + scrollStep >= scroll2Value) currentOffset = self[offsetPos];
-                                if (scrollForward == -1 && currentOffset + scrollStep <= scroll2Value) currentOffset = self[offsetPos];
+                                if (scrollForward == 1 && currentOffset + scrollStep >= scroll2Value) {
+                                    currentOffset = self[offsetPos];
+                                }
+                                if (scrollForward == -1 && currentOffset + scrollStep <= scroll2Value) {
+                                    currentOffset = self[offsetPos];
+                                }
                                 if (self.el[offsetPos] == currentOffset && scrollCallback) {
                                     scrollCallback();
                                 }
@@ -1070,8 +909,12 @@
 
                                 if (delta > 0 && scroll2Value < maxScrollValue || delta < 0 && scroll2Value > 0) {
                                     scroll2Value = scroll2Value + delta;
-                                    if (scroll2Value < 0) scroll2Value = 0;
-                                    if (scroll2Value > maxScrollValue) scroll2Value = maxScrollValue;
+                                    if (scroll2Value < 0) {
+                                        scroll2Value = 0;
+                                    }
+                                    if (scroll2Value > maxScrollValue) {
+                                        scroll2Value = maxScrollValue;
+                                    }
 
                                     self.scrollTo = self.scrollTo || {};
                                     self.scrollTo[offsetPos] = scroll2Value;
@@ -1097,8 +940,9 @@
 
                             // For .scroll-arrow and .scroll-element_track click
                             var mousedown = function mousedown(event) {
-                                if (event.which != 1) // lmb
+                                if (event.which != 1) {
                                     return true;
+                                }
 
                                 scrollForward = 1;
                                 var data = {
@@ -1111,7 +955,7 @@
                                     timer = 0;
 
                                 if (util.hasClass(this, 'scroll-arrow')) {
-                                    scrollForward = util.hasClass(this, "scroll-arrow_more") ? 1 : -1;
+                                    scrollForward = util.hasClass(this, 'scroll-arrow_more') ? 1 : -1;
                                     scrollStep = options.scrollStep * scrollForward;
                                     scroll2Value = scrollForward > 0 ? data.maxScrollValue : 0;
                                     if (options.isRtl) {
@@ -1125,7 +969,9 @@
                                     }
                                 } else {
                                     scrollForward = data.eventOffset > data.scrollbarOffset + data.scrollbarSize ? 1 : data.eventOffset < data.scrollbarOffset ? -1 : 0;
-                                    if (key === 'x' && options.isRtl && (BROWSER.msie || BROWSER.msedge)) scrollForward = scrollForward * -1;
+                                    if (key === 'x' && options.isRtl && (BROWSER.msie || BROWSER.msedge)) {
+                                        scrollForward = scrollForward * -1;
+                                    }
                                     scrollStep = Math.round(item.visible * 0.75) * scrollForward;
                                     scroll2Value = data.eventOffset - data.scrollbarOffset - (options.stepScrolling ? scrollForward == 1 ? data.scrollbarSize : 0 : Math.round(data.scrollbarSize / 2));
                                     scroll2Value = self.el[offsetPos] + scroll2Value / item.ratio;
@@ -1150,7 +996,7 @@
                                 setTimeout(function () {
                                     if (self.scrollTo) {
                                         // c.animate(S.scrollTo, o.duration);
-                                        //TODO use css animation
+                                        // TODO use css animation
                                         // self.el[offsetPos]
                                         self.scrollTo = null;
                                     }
@@ -1221,7 +1067,7 @@
                 }, {
                     key: '_handleMouseDown',
                     value: function _handleMouseDown(callback, event, eventHandler) {
-                        var self = this;
+                        // let self = this;
 
                         function blur4doc(e) {
                             var body = document.querySelector('body');
@@ -1301,7 +1147,7 @@
             var Bar = {};
 
             Bar.install = function (Vue, options) {
-                _directive2.default.call(null, Vue, options);
+                (0, _directive2.default)(Vue, options);
                 Vue.component(_component2.default.name, _component2.default);
             };
 
@@ -1469,7 +1315,7 @@
 
             function install(Vue, options) {
                 if (new Vue().$isServer) {
-                    throw 'Not support SSR!';
+                    throw Error('Not support SSR!');
                 }
                 Vue.directive(NAME, {
                     bind: function bind(el, binding, vnode) {
@@ -1570,10 +1416,18 @@
                     el.className = el.className.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
                 },
                 addEvent: function addEvent(el, type, handler) {
-                    if (el.attachEvent) el.attachEvent('on' + type, handler); else el.addEventListener(type, handler);
+                    if (el.attachEvent) {
+                        el.attachEvent('on' + type, handler);
+                    } else {
+                        el.addEventListener(type, handler);
+                    }
                 },
                 removeEvent: function removeEvent(el, type, handler) {
-                    if (el.detachEvent) el.detachEvent('on' + type, handler); else el.removeEventListener(type, handler);
+                    if (el.detachEvent) {
+                        el.detachEvent('on' + type, handler);
+                    } else {
+                        el.removeEventListener(type, handler);
+                    }
                 },
 
                 /**
@@ -1632,9 +1486,9 @@
                         el.dispatchEvent(e);
                     } else {
                         // IE 8
-                        var e = document.createEventObject();
-                        e.eventType = type;
-                        el.fireEvent('on' + e.eventType, e);
+                        var _e = document.createEventObject();
+                        _e.eventType = type;
+                        el.fireEvent('on' + _e.eventType, _e);
                     }
                 },
                 isVisible: function isVisible(el) {
@@ -1660,11 +1514,11 @@
                 },
                 scrollTop: function scrollTop(el, pos, cb) {
                     var attr = 'scrollTop';
-                    if (typeof pos === 'undefined' && typeof duration === 'undefined') {
+                    if (typeof pos === 'undefined') {
                         return el[attr];
                     }
                     if (typeof pos === 'undefined') {
-                        throw 'Illegal argument: pos[' + pos + ']';
+                        throw Error('Illegal argument: pos[' + pos + ']');
                     }
                     var original = el[attr];
                     var distance = original - pos;
@@ -1687,11 +1541,11 @@
                 },
                 scrollLeft: function scrollLeft(el, pos, cb) {
                     var attr = 'scrollLeft';
-                    if (typeof pos === 'undefined' && typeof duration === 'undefined') {
+                    if (typeof pos === 'undefined') {
                         return el[attr];
                     }
                     if (typeof pos === 'undefined') {
-                        throw 'Illegal argument: pos[' + pos + ']';
+                        throw Error('Illegal argument: pos[' + pos + ']');
                     }
                     var original = el[attr];
                     var distance = original - pos;
@@ -1731,14 +1585,14 @@
                         length = arguments.length,
                         deep = false;
                     // 处理深度拷贝情况（第一个参数是boolean类型且为true）
-                    if (typeof target === "boolean") {
+                    if (typeof target === 'boolean') {
                         deep = target;
                         target = arguments[1] || {};
                         // 跳过第一个参数（是否深度拷贝）和第二个参数（目标对象）
                         i = 2;
                     }
                     // 如果目标不是对象或函数，则初始化为空对象
-                    if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && typeof target !== 'function') {
+                    if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== 'object' && typeof target !== 'function') {
                         target = {};
                     }
                     // 如果只指定了一个参数，则使用jQuery自身作为目标对象
@@ -1788,7 +1642,7 @@
                         return true;
                     }
                     var Ctor = Object.prototype.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
-                    return typeof Ctor == 'function' && Ctor instanceof Ctor && Function.prototype.toString.call(Ctor) == Function.prototype.toString.call(Object);
+                    return typeof Ctor === 'function' && Ctor instanceof Ctor && Function.prototype.toString.call(Ctor) == Function.prototype.toString.call(Object);
                 }
             };
 
@@ -1804,7 +1658,7 @@
             /* harmony import */
             var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_component_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_component_vue__);
             /* harmony import */
-            var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_ace301da_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_component_vue__ = __webpack_require__(19);
+            var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_427881cc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_component_vue__ = __webpack_require__(19);
 
             function injectStyle(ssrContext) {
                 __webpack_require__(13)
@@ -1825,7 +1679,7 @@
             var __vue_module_identifier__ = null;
             var Component = normalizeComponent(
                 __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_component_vue___default.a,
-                __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_ace301da_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_component_vue__["a" /* default */],
+                __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_427881cc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_component_vue__["a" /* default */],
                 __vue_template_functional__,
                 __vue_styles__,
                 __vue_scopeId__,
@@ -1848,7 +1702,7 @@
             if (typeof content === 'string') content = [[module.i, content, '']];
             if (content.locals) module.exports = content.locals;
 // add the styles to the DOM
-            var update = __webpack_require__(15)("7d854076", content, true);
+            var update = __webpack_require__(15)("2d9019ef", content, true);
 
             /***/
         }),

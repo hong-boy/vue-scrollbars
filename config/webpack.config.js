@@ -8,12 +8,6 @@ module.exports = {
     entry: {
         main: path.join(rootdir, 'src/main.js')
     },
-    // output: {
-    //     path: path.join(rootdir, 'dist/'),
-    //     publicPath: '',
-    //     filename: 'build.js',
-    //     chunkFilename: '[name].[chunkhash].chunk.js'
-    // },
     module: {
         rules: [
             {test: /\.vue$/, use: ['vue-loader']},

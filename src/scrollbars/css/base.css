@@ -1,6 +1,6 @@
 /*************** SCROLLBAR BASE CSS ***************/
 body{
-    overflow:hidden;
+    /*overflow:hidden;*/
 }
 .scroll-wrapper{
     overflow:hidden !important;

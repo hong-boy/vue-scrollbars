@@ -1,10 +1,10 @@
-import common from './util'
+import common from './util';
 
 const BROWSER = {
     body: document.querySelector('body'),
     data: {
         index: 0,
-        name: 'scrollbar'
+        name: 'scrollbar',
     },
     firefox: /firefox/i.test(navigator.userAgent),
     macosx: /mac/i.test(navigator.platform),
@@ -14,7 +14,7 @@ const BROWSER = {
     overlay: null, // check if browser overlays scrollbar which means the scrollbars totally floated
     scroll: null, // restore browser scrollbar size info:scrollbar size
     scrolls: new Set(), // restore mutiple instance of Scrollbar
-    webkit: /webkit/i.test(navigator.userAgent) && !/edge\/\d+/i.test(navigator.userAgent)
+    webkit: /webkit/i.test(navigator.userAgent) && !/edge\/\d+/i.test(navigator.userAgent),
 };
 
 const DEFAULTS = {
@@ -37,11 +37,11 @@ const DEFAULTS = {
     onFallback: null, // callback function if scrollbar is not initialized
     onInit: null, // callback function on first initialization
     onScroll: null, // callback function on content scrolling
-    onUpdate: null  //callback function on init/resize (before scrollbar size calculation
+    onUpdate: null,  // callback function on init/resize (before scrollbar size calculation
 };
 
 const BAR_TYPES = {
-    advanced: function () {
+    advanced() {
         // [ // For picture bar
         //     '<div class="scroll-element">',
         //     '<div class="scroll-element_corner"></div>',
@@ -116,7 +116,7 @@ const BAR_TYPES = {
 
         return el;
     },
-    simple: function () {
+    simple() {
         // [
         //     '<div class="scroll-element">',
         //     '<div class="scroll-element_outer">',
@@ -143,7 +143,7 @@ const BAR_TYPES = {
         el4outer.appendChild(el4bar);
 
         return el;
-    }
+    },
 };
 
 let util = Object.assign(common, {
@@ -159,26 +159,26 @@ let util = Object.assign(common, {
         if (BROWSER.webkit && !actualSize) {
             return {
                 height: 0,
-                width: 0
+                width: 0,
             };
         }
 
         if (!BROWSER.data.outer) {
             let css = {
-                "border": "none",
-                "box-sizing": "content-box",
-                "height": "200px",
-                "margin": "0",
-                "padding": "0",
-                "width": "200px"
+                'border': 'none',
+                'box-sizing': 'content-box',
+                'height': '200px',
+                'margin': '0',
+                'padding': '0',
+                'width': '200px',
             };
             BROWSER.data.inner = document.createElement('div');
             util.css(BROWSER.data.inner, css);
             let outerCSS = Object.assign({
-                "left": "-1000px",
-                "overflow": "scroll",
-                "position": "absolute",
-                "top": "-1000px"
+                'left': '-1000px',
+                'overflow': 'scroll',
+                'position': 'absolute',
+                'top': '-1000px',
             }, css);
             BROWSER.data.outer = document.createElement('div');
             util.css(BROWSER.data.outer, outerCSS);
@@ -195,7 +195,7 @@ let util = Object.assign(common, {
 
         return {
             height: Math.ceil((offsetOuter.top - offsetInner.top) || 0),
-            width: Math.ceil((offsetOuter.left - offsetInner.left) || 0)
+            width: Math.ceil((offsetOuter.left - offsetInner.left) || 0),
         };
     },
     /**
@@ -203,31 +203,33 @@ let util = Object.assign(common, {
      *
      * @returns {Boolean}
      */
-    isScrollOverlaysContent(){
+    isScrollOverlaysContent() {
         var scrollSize = this.getBrowserScrollSize(true);
         return !(scrollSize.height || scrollSize.width);
     },
     isVerticalScroll(event) {
         var e = event;
-        if (e.axis && e.axis === e.HORIZONTAL_AXIS)
+        if (e.axis && e.axis === e.HORIZONTAL_AXIS) {
             return false;
-        if (e.wheelDeltaX)
+        }
+        if (e.wheelDeltaX) {
             return false;
+        }
         return true;
     },
-    storeHandlers(inst, eventName, element, handler){
-        inst._handlers.add({eventName, element, handler});
+    storeHandlers(inst, eventName, element, handler) {
+        inst._handlers.add({eventName, element, handler,});
     },
-    removeHanlders(inst){
-        inst._handlers.forEach(bean => {
+    removeHanlders(inst) {
+        inst._handlers.forEach((bean) => {
             util.removeEvent(bean.element, bean.eventName, bean.handler);
         });
     },
-    storeScrollHandlers(inst, eventName, element, handler){
-        inst._disabledScrollHandlers.add({eventName, element, handler});
+    storeScrollHandlers(inst, eventName, element, handler) {
+        inst._disabledScrollHandlers.add({eventName, element, handler,});
     },
-    removeScrollHanlders(inst){
-        inst._disabledScrollHandlers.forEach(bean => {
+    removeScrollHanlders(inst) {
+        inst._disabledScrollHandlers.forEach((bean) => {
             util.removeEvent(bean.element, bean.eventName, bean.handler);
         });
     },
@@ -239,18 +241,18 @@ let util = Object.assign(common, {
 let updateScrollbars = (function () {
     let timer = null;
     return function (force) {
-        BROWSER.scrolls.forEach(inst => {
+        BROWSER.scrolls.forEach((inst) => {
             let options = inst.options;
             let el = inst.el;
             let wrapper = inst.wrapper;
             let scrollx = inst.scrollx;
             let scrolly = inst.scrolly;
-            if (force || (options.autoUpdate && wrapper
-                && util.isVisible(wrapper)
-                && (el.scrollWidth != scrollx.size
-                    || el.scrollHeight != scrolly.size
-                    || wrapper.clientWidth != scrollx.visible
-                    || wrapper.clientHeight != scrolly.visible
+            if (force || (options.autoUpdate && wrapper &&
+                util.isVisible(wrapper) &&
+                (el.scrollWidth != scrollx.size ||
+                    el.scrollHeight != scrolly.size ||
+                    wrapper.clientWidth != scrollx.visible ||
+                    wrapper.clientHeight != scrolly.visible
                 ))) {
                 inst.update();
             }
@@ -277,8 +279,8 @@ export default class Scrollbar {
             // monit scrollbar size changed
             updateScrollbars();
             // add global resize listener
-            let resize = util.throttle(function (e) {
-                let force = false;
+            let resize = util.debounce(function (e) {
+                let force = true;
                 if (BROWSER.scroll && (BROWSER.scroll.height || BROWSER.scroll.width)) {
                     let currentScroll = util.getBrowserScrollSize();
                     if (currentScroll.height != BROWSER.scroll.height || currentScroll.width != BROWSER.scroll.width) {
@@ -294,179 +296,12 @@ export default class Scrollbar {
         BROWSER.scrolls.add(this);
     }
 
-    // init_bak(options) {
-    //     let self = this;
-    //     let el = self.el;
-    //     let cw = self.containerWrapper || el;
-    //     let wrapper = self.wrapper;
-    //     let bar = {x: self.scrollx, y: self.scrolly};
-    //     let initScroll = {
-    //         scrollLeft: self.el.scrollLeft,
-    //         scrollTop: self.el.scrollTop,
-    //     };
-    //     options = self.options = Object.assign({}, DEFAULTS, options);
-    //     if (!wrapper) {
-    //         // first init
-    //         // render dom structure
-    //         wrapper = self.wrapper = document.createElement('div');
-    //         ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach(className => {
-    //             util.addClass(wrapper, className);
-    //         });
-    //         util.css(wrapper, {
-    //             position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative'
-    //         });
-    //         util.insertBefore(wrapper, el).appendChild(el);
-    //
-    //         if (options.isRTL) {
-    //             util.addClass(wrapper, 'scroll--rtl')
-    //         }
-    //
-    //         // check if textarea
-    //         if (el.tagName.toLowerCase() === 'textarea') {
-    //             cw = self.containerWrapper = document.createElement('div');
-    //             util.insertBefore(cw, el).appendChild(el);
-    //             util.addClass(wrapper, 'scroll-textarea');
-    //         }
-    //
-    //         let css = {
-    //             height: 'auto',
-    //             "max-height": "",
-    //             "margin-bottom": `${BROWSER.data.height * -1}px`
-    //         };
-    //         css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
-    //         util.addClass(cw, 'scroll-content');
-    //         util.css(cw, css);
-    //
-    //         // scroll on el
-    //         function scroll4el(e) {
-    //             let scrollLeft = self.el.scrollLeft;
-    //             let scrollTop = self.el.scrollTop;
-    //             if (options.isRtl) {
-    //                 // webkit   0:100
-    //                 // ie/edge  100:0
-    //                 // firefox -100:0
-    //                 switch (true) {
-    //                     case BROWSER.firefox:
-    //                         scrollLeft = Math.abs(scrollLeft);
-    //                     case BROWSER.msedge || BROWSER.msie:
-    //                         scrollLeft = self.el.scrollWidth - self.el.clientWidth - scrollLeft;
-    //                         break;
-    //                 }
-    //             }
-    //             // onScroll handler
-    //             if (typeof options.onScroll === 'function') {
-    //                 options.onScroll.call(self, {
-    //                     maxScroll: bar.y.maxScrollOffset,
-    //                     scroll: scrollTop,
-    //                     size: bar.y.size,
-    //                     visible: bar.y.visible
-    //                 }, {
-    //                     maxScroll: bar.x.maxScrollOffset,
-    //                     scroll: scrollLeft,
-    //                     size: bar.x.size,
-    //                     visible: bar.x.visible
-    //                 });
-    //             }
-    //             bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
-    //             bar.y.isVisible && (util.css(bar.y.scroll.bar, 'top', `${scrollTop * bar.y.ratio}px`));
-    //         }
-    //
-    //         util.addEvent(el, 'scroll', scroll4el);
-    //         util.storeHandlers(self, 'scroll', el, scroll4el);
-    //         // prevent native scrollbars to be visible on #anchor click
-    //         function scroll4wrapper(e) {
-    //             wrapper.scrollTop = 0;
-    //             wrapper.scrollLeft = 0;
-    //         }
-    //
-    //         util.addEvent(wrapper, 'scroll', scroll4wrapper);
-    //         util.storeHandlers(self, 'scroll', wrapper, scroll4wrapper);
-    //         // if need disable body scroll
-    //         if (options.disableBodyScroll) {
-    //             var handleMouseScroll = function (event) {
-    //                 util.isVerticalScroll(event) ?
-    //                     bar.y.isVisible && bar.y.mousewheel(event) :
-    //                     bar.x.isVisible && bar.x.mousewheel(event);
-    //             };
-    //
-    //             util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
-    //             util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
-    //             util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
-    //             util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
-    //
-    //             if (BROWSER.mobile) {
-    //                 function touchstart4wrapper(e) {
-    //                     let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
-    //                     let originalTouch = {
-    //                         pageX: touch.pageX,
-    //                         pageY: touch.pageY
-    //                     };
-    //                     let originalScroll = {
-    //                         left: touch.scrollLeft,
-    //                         top: touch.scrollTop
-    //                     };
-    //                     // touchmove
-    //                     function touchmove4doc(e) {
-    //                         let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
-    //                         el.scrollLeft = originalTouch.pageX + originalScroll.left - touch.pageX;
-    //                         el.scrollTop = originalTouch.pageY + originalScroll.top - touch.pageY;
-    //                         e.preventDefault();
-    //                     }
-    //
-    //                     util.addEvent(document, 'touchmove', touchmove4doc);
-    //                     // touchend
-    //                     function touchend4doc(e) {
-    //                         util.removeEvent(wrapper, 'touchstart', touchstart4wrapper);
-    //                         util.removeEvent(document, 'touchmove', touchmove4doc);
-    //                         util.removeEvent(document, 'touchend', touchend4doc);
-    //                     }
-    //
-    //                     util.addEvent(document, 'touchend', touchend4doc);
-    //                 }
-    //
-    //                 util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
-    //                 util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
-    //             }
-    //         }
-    //         if (typeof options.onInit === 'function') {
-    //             options.onInit.call(this, el);
-    //         }
-    //     } else {
-    //         // update
-    //         let css = {
-    //             height: 'auto',
-    //             "max-height": "",
-    //             "margin-bottom": `${BROWSER.data.height * -1}px`
-    //         };
-    //         css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
-    //         util.css(cw, css);
-    //     }
-    //     //初始化滚动条（绘制滚动条DOM结构，并计算大小）
-    //     self._renderBars(bar);
-    //     // reset styles
-    //     self._reset4BarCSS(bar);
-    //     // calc init sizes
-    //     self._calcInitSize4Bars(bar);
-    //     // update scrollbar visibility/dimensions
-    //     self._updateScroll('x', self.scrollx);
-    //     self._updateScroll('y', self.scrolly);
-    //     if (typeof options.onUpdate === 'function') {
-    //         options.onUpdate.apply(this, [self.el]);
-    //     }
-    //     // calc scrollbar size
-    //     self._calcSize4Bars(bar);
-    //
-    //     self.el.scrollLeft = initScroll.scrollLeft;
-    //     self.el.scrollTop = initScroll.scrollTop;
-    //     util.trigger(self.el, 'scroll');
-    // }
-
     init(options) {
         let self = this;
         let el = self.el;
         let cw = self.containerWrapper || el;
         let wrapper = self.wrapper;
-        let bar = {x: self.scrollx, y: self.scrolly};
+        let bar = {x: self.scrollx, y: self.scrolly,};
         let initScroll = {
             scrollLeft: self.el.scrollLeft,
             scrollTop: self.el.scrollTop,
@@ -475,9 +310,11 @@ export default class Scrollbar {
         // first init
         // render dom structure
         wrapper = self.wrapper = self._originalWrapper || document.createElement('div');
-        ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach(className => util.addClass(wrapper, className));
+        ['scroll-wrapper', util.attr(el, 'class')].join(' ').split(/\s/).forEach((className) => {
+            return util.addClass(wrapper, className);
+        });
         util.css(wrapper, {
-            position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative'
+            position: util.css(el, 'position') === 'absolute' ? 'absolute' : 'relative',
         });
         !self._originalWrapper && util.insertBefore(wrapper, el).appendChild(el);
 
@@ -494,10 +331,10 @@ export default class Scrollbar {
 
         let css = {
             height: 'auto',
-            "max-height": "",
-            "margin-bottom": `${BROWSER.data.height * -1}px`
+            'max-height': '',
+            'margin-bottom': `${BROWSER.scroll.height * -1}px`,
         };
-        css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
+        css[options.isRTL ? 'margin-left' : 'margin-right'] = `${BROWSER.scroll.width * -1}px`;
         util.addClass(cw, 'scroll-content');
         util.css(cw, css);
 
@@ -523,12 +360,12 @@ export default class Scrollbar {
                     maxScroll: bar.y.maxScrollOffset,
                     scroll: scrollTop,
                     size: bar.y.size,
-                    visible: bar.y.visible
+                    visible: bar.y.visible,
                 }, {
                     maxScroll: bar.x.maxScrollOffset,
                     scroll: scrollLeft,
                     size: bar.x.size,
-                    visible: bar.x.visible
+                    visible: bar.x.visible,
                 });
             }
             bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
@@ -563,15 +400,15 @@ export default class Scrollbar {
             util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
 
             if (BROWSER.mobile) {
-                function touchstart4wrapper(e) {
+                var touchstart4wrapper = function (e) {
                     let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
                     let originalTouch = {
                         pageX: touch.pageX,
-                        pageY: touch.pageY
+                        pageY: touch.pageY,
                     };
                     let originalScroll = {
                         left: touch.scrollLeft,
-                        top: touch.scrollTop
+                        top: touch.scrollTop,
                     };
                     // touchmove
                     function touchmove4doc(e) {
@@ -590,8 +427,7 @@ export default class Scrollbar {
                     }
 
                     util.addEvent(document, 'touchend', touchend4doc);
-                }
-
+                };
                 util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
                 util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
                 util.storeScrollHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
@@ -627,17 +463,17 @@ export default class Scrollbar {
         let self = this;
         let original = self.options;
         options = self.options = util.extend(true, {}, original, options);
-        let bar = {x: self.scrollx, y: self.scrolly};
+        let bar = {x: self.scrollx, y: self.scrolly,};
         let initScroll = {
             scrollLeft: self.el.scrollLeft,
             scrollTop: self.el.scrollTop,
         };
         let css = {
             height: 'auto',
-            "max-height": "",
-            "margin-bottom": `${BROWSER.data.height * -1}px`
+            'max-height': '',
+            'margin-bottom': `${BROWSER.scroll.height * -1}px`,
         };
-        css[options.isRTL ? 'margin-right' : 'margin-left'] = `${BROWSER.data.width * -1}px`;
+        css[options.isRTL ? 'margin-left' : 'margin-right'] = `${BROWSER.scroll.width * -1}px`;
         util.css(self.containerWrapper || self.el, css);
 
         // if need disable body scroll
@@ -658,15 +494,15 @@ export default class Scrollbar {
             util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
 
             if (BROWSER.mobile) {
-                function touchstart4wrapper(e) {
+                let touchstart4wrapper = function (e) {
                     let touch = e.originalEvent.touches && e.originalEvent.touches[0] || e;
                     let originalTouch = {
                         pageX: touch.pageX,
-                        pageY: touch.pageY
+                        pageY: touch.pageY,
                     };
                     let originalScroll = {
                         left: touch.scrollLeft,
-                        top: touch.scrollTop
+                        top: touch.scrollTop,
                     };
                     // touchmove
                     function touchmove4doc(e) {
@@ -685,8 +521,7 @@ export default class Scrollbar {
                     }
 
                     util.addEvent(document, 'touchend', touchend4doc);
-                }
-
+                };
                 util.addEvent(wrapper, 'touchstart', touchstart4wrapper);
                 util.storeHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
                 util.storeScrollHandlers(self, 'touchstart', wrapper, touchstart4wrapper);
@@ -723,18 +558,18 @@ export default class Scrollbar {
         }
         delete self.el.__instance;
         BROWSER.scrolls.delete(self);
-        //remove listeners
+        // remove listeners
         util.removeHanlders(self);
         delete self._handlers;
         // restore DOM structure
         util.insertBefore(self.el, self.wrapper);
         util.css(self.el, {
-            "height": "",
-            "margin": "",
-            "max-height": ""
+            'height': '',
+            'margin': '',
+            'max-height': '',
         });
-        'scroll-content scroll-scrollx_visible scroll-scrolly_visible'.split(/\s/).forEach(className => {
-            util.removeClass(self.el, className)
+        'scroll-content scroll-scrollx_visible scroll-scrolly_visible'.split(/\s/).forEach((className) => {
+            util.removeClass(self.el, className);
         });
         util.removeClass(self.scrollx.scroll, 'scroll-scrollx_visible');
         util.removeClass(self.scrolly.scroll, 'scroll-scrolly_visible');
@@ -750,6 +585,7 @@ export default class Scrollbar {
     }
 
     _updateScroll(d, scrollx) {
+        debugger;
         var container = this.el,
             containerWrapper = this.containerWrapper || container,
             scrollClass = 'scroll-scroll' + d + '_visible',
@@ -774,33 +610,33 @@ export default class Scrollbar {
         if (d === 'y') {
             if (container.tagName.toLowerCase() === 'textarea' || AreaSize < AreaVisible) {
                 util.css(containerWrapper, {
-                    "height": (AreaVisible + BROWSER.scroll.height) + 'px',
-                    "max-height": "none"
+                    'height': (AreaVisible + BROWSER.scroll.height) + 'px',
+                    'max-height': 'none',
                 });
             } else {
                 util.css(containerWrapper, {
-                    //"height": "auto", // do not reset height value: issue with height:100%!
-                    "max-height": (AreaVisible + BROWSER.scroll.height) + 'px'
+                    // "height": "auto", // do not reset height value: issue with height:100%!
+                    'max-height': (AreaVisible + BROWSER.scroll.height) + 'px',
                 });
             }
         }
 
-        if (scrollx.size != container.scrollWidth
-            || scrolly.size != container.scrollHeight
-            || scrollx.visible != wrapper.clientWidth
-            || scrolly.visible != wrapper.clientHeight
-            || scrollx.offset != (parseInt(util.css(container, 'left'), 10) || 0)
-            || scrolly.offset != (parseInt(util.css(container, 'top'), 10) || 0)
+        if (scrollx.size != container.scrollWidth ||
+            scrolly.size != container.scrollHeight ||
+            scrollx.visible != wrapper.clientWidth ||
+            scrolly.visible != wrapper.clientHeight ||
+            scrollx.offset != (parseInt(util.css(container, 'left'), 10) || 0) ||
+            scrolly.offset != (parseInt(util.css(container, 'top'), 10) || 0)
         ) {
             Object.assign(this.scrollx, {
                 offset: parseInt(util.css(container, 'left'), 10) || 0,
                 size: container.scrollWidth,
-                visible: wrapper.clientWidth
+                visible: wrapper.clientWidth,
             });
             Object.assign(this.scrolly, {
                 offset: parseInt(util.css(container, 'top'), 10) || 0,
                 size: container.scrollHeight,
-                visible: wrapper.clientHeight
+                visible: wrapper.clientHeight,
             });
             this._updateScroll(d === 'x' ? 'y' : 'x', scrolly);
         }
@@ -812,7 +648,7 @@ export default class Scrollbar {
         Object.keys(bar).sort().forEach(function (key) {
             let item = bar[key];
             var scrollClass = 'scroll-scroll' + key + '_visible';
-            var scrolly = (key == "x") ? bar.y : bar.x;
+            var scrolly = (key == 'x') ? bar.y : bar.x;
 
             util.removeClass(item.scroll, scrollClass);
             util.removeClass(scrolly.scroll, scrollClass);
@@ -825,14 +661,14 @@ export default class Scrollbar {
         let self = this;
         Object.keys(bar).sort().forEach(function (key) {
             let item = bar[key];
-            Object.assign(item, (key == "x") ? {
+            Object.assign(item, (key == 'x') ? {
                 offset: parseInt(util.css(self.el, 'left'), 10) || 0,
                 size: self.el.scrollWidth,
-                visible: self.wrapper.clientWidth
+                visible: self.wrapper.clientWidth,
             } : {
                 offset: parseInt(util.css(self.el, 'top'), 10) || 0,
                 size: self.el.scrollHeight,
-                visible: self.wrapper.clientHeight
+                visible: self.wrapper.clientHeight,
             });
         });
     }
@@ -850,7 +686,8 @@ export default class Scrollbar {
             var AreaSize = item.size;
             var AreaVisible = item.visible + offset;
 
-            var scrollSize = parseInt(util.css(item.scroll.size, cssFullSize), 10) + (parseInt(util.css(item.scroll.size, cssOffset), 10) || 0);
+            var scrollSize = parseInt(util.css(item.scroll.size, cssFullSize), 10) +
+                (parseInt(util.css(item.scroll.size, cssOffset), 10) || 0);
 
             if (self.options.autoScrollSize) {
                 item.scrollbarSize = parseInt(scrollSize * AreaVisible / AreaSize, 10);
@@ -871,7 +708,7 @@ export default class Scrollbar {
     _renderBars(bar) {
         let self = this;
         let options = self.options;
-        Object.keys(bar).sort().forEach(key => {
+        Object.keys(bar).sort().forEach((key) => {
             let item = bar[key];
             if (item.scroll) {
                 // rendered already
@@ -886,10 +723,12 @@ export default class Scrollbar {
             let scrollTo = function () {
                 var currentOffset = self.el[offsetPos];
                 self.el[offsetPos] = (currentOffset + scrollStep);
-                if (scrollForward == 1 && (currentOffset + scrollStep) >= scroll2Value)
+                if (scrollForward == 1 && (currentOffset + scrollStep) >= scroll2Value) {
                     currentOffset = self[offsetPos];
-                if (scrollForward == -1 && (currentOffset + scrollStep) <= scroll2Value)
+                }
+                if (scrollForward == -1 && (currentOffset + scrollStep) <= scroll2Value) {
                     currentOffset = self[offsetPos];
+                }
                 if (self.el[offsetPos] == currentOffset && scrollCallback) {
                     scrollCallback();
                 }
@@ -921,13 +760,15 @@ export default class Scrollbar {
                     }
                 }
 
-                if ((delta > 0 && scroll2Value < maxScrollValue)
-                    || (delta < 0 && scroll2Value > 0)) {
+                if ((delta > 0 && scroll2Value < maxScrollValue) ||
+                    (delta < 0 && scroll2Value > 0)) {
                     scroll2Value = scroll2Value + delta;
-                    if (scroll2Value < 0)
+                    if (scroll2Value < 0) {
                         scroll2Value = 0;
-                    if (scroll2Value > maxScrollValue)
+                    }
+                    if (scroll2Value > maxScrollValue) {
                         scroll2Value = maxScrollValue;
+                    }
 
                     self.scrollTo = self.scrollTo || {};
                     self.scrollTo[offsetPos] = scroll2Value;
@@ -936,7 +777,7 @@ export default class Scrollbar {
                         util[offsetPos].call(util, self.el, self.scrollTo[offsetPos], function () {
                             scroll2Value = self.el[offsetPos];
                             self.scrollTo = null;
-                        })
+                        });
                     }
                 }
                 util.cancelBubble(e);
@@ -953,20 +794,21 @@ export default class Scrollbar {
 
             // For .scroll-arrow and .scroll-element_track click
             let mousedown = function (event) {
-                if (event.which != 1) // lmb
+                if (event.which != 1) {
                     return true;
+                }
 
                 scrollForward = 1;
                 var data = {
                     eventOffset: event[(key === 'x') ? 'pageX' : 'pageY'],
                     maxScrollValue: item.size - item.visible - item.offset,
                     scrollbarOffset: util.offset(item.scroll.bar)[(key === 'x') ? 'left' : 'top'],
-                    scrollbarSize: item.scroll.bar[(key === 'x') ? 'offsetWidth' : 'offsetHeight']
+                    scrollbarSize: item.scroll.bar[(key === 'x') ? 'offsetWidth' : 'offsetHeight'],
                 };
                 var timeout = 0, timer = 0;
 
                 if (util.hasClass(this, 'scroll-arrow')) {
-                    scrollForward = util.hasClass(this, "scroll-arrow_more") ? 1 : -1;
+                    scrollForward = util.hasClass(this, 'scroll-arrow_more') ? 1 : -1;
                     scrollStep = options.scrollStep * scrollForward;
                     scroll2Value = scrollForward > 0 ? data.maxScrollValue : 0;
                     if (options.isRtl) {
@@ -981,8 +823,9 @@ export default class Scrollbar {
                 } else {
                     scrollForward = (data.eventOffset > (data.scrollbarOffset + data.scrollbarSize) ? 1
                         : (data.eventOffset < data.scrollbarOffset ? -1 : 0));
-                    if (key === 'x' && options.isRtl && (BROWSER.msie || BROWSER.msedge))
+                    if (key === 'x' && options.isRtl && (BROWSER.msie || BROWSER.msedge)) {
                         scrollForward = scrollForward * -1;
+                    }
                     scrollStep = Math.round(item.visible * 0.75) * scrollForward;
                     scroll2Value = (data.eventOffset - data.scrollbarOffset -
                     (options.stepScrolling ? (scrollForward == 1 ? data.scrollbarSize : 0)
@@ -1009,8 +852,9 @@ export default class Scrollbar {
                 setTimeout(function () {
                     if (self.scrollTo) {
                         // c.animate(S.scrollTo, o.duration);
-                        //TODO use css animation
+                        // TODO use css animation
                         // self.el[offsetPos]
+                        util[offsetPos](self.scrollTo[offsetPos]);
                         self.scrollTo = null;
                     }
                 }, 1);
@@ -1078,7 +922,7 @@ export default class Scrollbar {
     }
 
     _handleMouseDown(callback, event, eventHandler) {
-        let self = this;
+        // let self = this;
 
         function blur4doc(e) {
             let body = document.querySelector('body');
