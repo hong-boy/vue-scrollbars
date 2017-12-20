@@ -1,101 +1,159 @@
 <template>
-    <div v-bar id="outer" class="scrollbar-dynamic outer-box">
-        <section class="section">
-            <h3>Demo - scrollbar-inner</h3>
-            <section v-bar.disableBodyScroll class="scrollbar-inner panel">
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-                <p>aaaaaaaaaaaaaaaaaa</p>
-            </section>
-        </section>
-        <section class="section">
-            <h3>Demo - textarea</h3>
-            <section class="panel">
-                <textarea v-bar="{disableBodyScroll:true}"
-                          class="textarea-scrollbar scrollbar-outer">
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.
-                </textarea>
-            </section>
-        </section>
-        <section class="section">
-            <h3>Demo - scrollbar component</h3>
-            <scrollbar :disableBodyScroll="disableBodyScroll" @onScroll="onscroll">
-                <section slot="content" class="scrollbar-inner panel">
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                    <p>aaaaaaaaaaaaaaaaaa</p>
-                </section>
-            </scrollbar>
-        </section>
-        <section class="section">
-            <h3>Demo - page map</h3>
-            <scrollbar @onInit="onInit4PageMap" @onUpdate="onUpdate4PageMap">
-                <div slot="pageMap" class="scroll-element_outer">
-                    <div class="scroll-element_size">
-                        <div class="scroll-element_track"></div>
-                        <div class="scroll-bar"></div>
+    <div v-bar class="scrollbar-dynamic wrapper">
+        <div class="page-content">
+            <h1>Basic Scrollbars</h1>
+            <div class="container">
+                <h2>Simple Inner</h2>
+                <div class="controls"></div>
+                <div class="content">
+                    <div class="demo">
+                        <div v-bar class="scrollbar-inner simple-inner">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis
+                                vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam
+                                congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est.
+                                Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare,
+                                ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget
+                                nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam
+                                viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis
+                                vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam
+                                congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est.
+                                Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare,
+                                ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget
+                                nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam
+                                viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis
+                                vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam
+                                congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est.
+                                Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare,
+                                ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget
+                                nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam
+                                viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis
+                                vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam
+                                congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est.
+                                Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare,
+                                ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget
+                                nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam
+                                viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <div slot="content" class="scrollbar-map panel">
-                    <img src="./tarzan.jpg" height="900" width="1200"/>
+            </div>
+            <div class="container">
+                <h2>Textarea</h2>
+                <div class="controls"></div>
+                <div class="content">
+                    <div class="demo">
+                        <textarea v-bar="{disableBodyScroll:true}" class="scrollbar-outer textarea-scrollbar">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a,
+                                scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus.
+                                Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel
+                                hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue,
+                                pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit
+                                amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante
+                                vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi.
+                                Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra
+                                nisi, in interdum massa nibh nec erat.
+                            </p>
+                        </textarea>
+                    </div>
                 </div>
-            </scrollbar>
-        </section>
+            </div>
+            <div class="container">
+                <h2>Page Map</h2>
+                <div class="controls"></div>
+                <div class="content">
+                    <div class="demo">
+                        <scrollbar>
+                            <div slot="pageMap" class="scroll-element_outer">
+                                <div class="scroll-element_size">
+                                    <div class="scroll-element_track"></div>
+                                    <div class="scroll-bar"></div>
+                                </div>
+                            </div>
+                            <div slot="content" class="scrollbar-map map-scrollbar">
+                                <img src="./tarzan.jpg" height="900" width="1200"/>
+                            </div>
+                        </scrollbar>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -126,42 +184,41 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, susc
 </script>
 
 <style lang="less">
-    *{
-        margin:0;
-        padding:0;
+    body{
+        width:100%;
+        height:100%;
     }
-    .outer-box{
-        position:relative;
-        border:1px solid #eee;
-        height:calc(100vh);
-    h3{
-        line-height:2;
+    .wrapper{
+        height:100vh; / / 需要显示声明height overflow: auto;
+        width:100%;
+    .scrollbar-dynamic{
+        max-height:none;
+    }
+    }
+    .page-content{
+        margin:0 auto;
+        max-width:1600px;
+        padding:25px;
+    }
+    .controls{
+        padding:0 0 10px;
+    }
+    .content{
+        max-width:1200px;
+    .demo{
+        border:1px solid #ccc;
+        padding:25px;
+    }
+    }
+    .simple-inner{
+        max-height:250px;
     }
     .textarea-scrollbar{
         height:250px;
-        width:500px;
-    }
-    }
-    .section{
-        position:relative;
-        margin:40px auto;
-        width:80%;
-        box-shadow:0 0 5px #e0b0b0;
-        padding:5px 15px;
-        overflow:hidden;
-    >
-    .panel{
-        border:1px solid #eee;
-    }
-    }
-    .panel{
-        position:relative;
-        padding:5px;
         width:100%;
-        max-height:300px;
-    &
-    .scrollbar-map{
-        width:300px;
     }
+    .map-scrollbar{
+        width:100%;
+        height:500px;
     }
 </style>

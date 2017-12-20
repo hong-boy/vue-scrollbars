@@ -279,8 +279,8 @@ export default class Scrollbar {
             // monit scrollbar size changed
             updateScrollbars();
             // add global resize listener
-            let resize = util.debounce(function (e) {
-                let force = true;
+            let resize = function (e) {
+                let force = false;
                 if (BROWSER.scroll && (BROWSER.scroll.height || BROWSER.scroll.width)) {
                     let currentScroll = util.getBrowserScrollSize();
                     if (currentScroll.height != BROWSER.scroll.height || currentScroll.width != BROWSER.scroll.width) {
@@ -289,7 +289,7 @@ export default class Scrollbar {
                     }
                 }
                 updateScrollbars(force);
-            });
+            };
             util.addEvent(window, 'resize', resize);
             util.storeHandlers(this, 'resize', window, resize);
         }
@@ -368,6 +368,7 @@ export default class Scrollbar {
                     visible: bar.x.visible,
                 });
             }
+            // TODO - It feels like zombie under IE, need smooth animation
             bar.x.isVisible && (util.css(bar.x.scroll.bar, 'left', `${scrollLeft * bar.x.ratio}px`));
             bar.y.isVisible && (util.css(bar.y.scroll.bar, 'top', `${scrollTop * bar.y.ratio}px`));
         }
@@ -392,11 +393,11 @@ export default class Scrollbar {
                     bar.x.isVisible && bar.x.mousewheel(event);
             };
 
-            util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
+            // util.addEvent(wrapper, 'MozMousePixelScroll', handleMouseScroll);
             util.addEvent(wrapper, 'mousewheel', handleMouseScroll);
-            util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+            // util.storeHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
             util.storeHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
-            util.storeScrollHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
+            // util.storeScrollHandlers(self, 'MozMousePixelScroll', wrapper, handleMouseScroll);
             util.storeScrollHandlers(self, 'mousewheel', wrapper, handleMouseScroll);
 
             if (BROWSER.mobile) {
@@ -774,6 +775,10 @@ export default class Scrollbar {
                     self.scrollTo[offsetPos] = scroll2Value;
 
                     if (self.scrollTo) {
+                        // self.el[offsetPos] = self.scrollTo[offsetPos];
+                        // scroll2Value = self.el[offsetPos];
+                        // self.scrollTo = null;
+                        // TODO - 当disableBodyScroll=true时，若用户快速滑动滚动条会出现延迟bug
                         util[offsetPos].call(util, self.el, self.scrollTo[offsetPos], function () {
                             scroll2Value = self.el[offsetPos];
                             self.scrollTo = null;

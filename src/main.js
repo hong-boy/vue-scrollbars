@@ -4,6 +4,7 @@ import scroll from './scrollbars/directive.js';
 import Scrollbar from './scrollbars/component.vue';
 // import Bar from '../dist/bundle.js'
 import Layout from './layout.vue';
+
 import 'normalize.css';
 import './scrollbars/css/base.css';
 import './scrollbars/css/dynamic.css';

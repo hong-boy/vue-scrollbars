@@ -1,7 +1,4 @@
 /*************** SCROLLBAR BASE CSS ***************/
-body{
-    /*overflow:hidden;*/
-}
 .scroll-wrapper{
     overflow:hidden !important;
     padding:0 !important;
@@ -63,4 +60,7 @@ body{
 .scroll-textarea > .scroll-content > textarea::-webkit-scrollbar{
     height:0;
     width:0;
+}
+.scroll-element .scroll-bar{
+    /*transition: width 0.5s linear, height 0.5s linear;*/
 }

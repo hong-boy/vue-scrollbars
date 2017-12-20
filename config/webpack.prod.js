@@ -7,8 +7,8 @@ const rootdir = path.join(__dirname, '../');
 
 module.exports = {
     entry: {
-        "bundle": path.join(rootdir, 'src/build.js'),
-        // "bundle.browser": path.join(rootdir, 'src/build.js')
+        "bundle": [path.join(rootdir, 'src/build.js')],
+        "bundle.browser": ['babel-polyfill', path.join(rootdir, 'src/build.js')],
     },
     output: {
         path: path.join(rootdir, 'dist/'),

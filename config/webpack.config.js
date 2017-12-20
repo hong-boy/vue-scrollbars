@@ -6,7 +6,8 @@ const rootdir = path.join(__dirname, '../');
 
 module.exports = {
     entry: {
-        main: path.join(rootdir, 'src/main.js')
+        // main: ['babel-polyfill', path.join(rootdir, 'src/main.js')]
+        main: [path.join(rootdir, 'src/main.js')]
     },
     module: {
         rules: [

@@ -160,8 +160,8 @@ export default {
                 (distance < 0 && original < pos)) {
                 id = window.requestAnimationFrame(fn);
             } else {
-                (typeof cb === 'function') && (cb(el));
                 window.cancelAnimationFrame(id);
+                (typeof cb === 'function') && (cb(el));
             }
         }
 
@@ -188,8 +188,8 @@ export default {
                 (distance < 0 && original < pos)) {
                 id = window.requestAnimationFrame(fn);
             } else {
-                (typeof cb === 'function') && (cb(el));
                 window.cancelAnimationFrame(id);
+                (typeof cb === 'function') && (cb(el));
             }
         }
 
