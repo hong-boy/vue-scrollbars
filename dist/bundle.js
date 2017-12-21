@@ -1787,9 +1787,11 @@
                                     self.scrollTo[offsetPos] = scroll2Value;
 
                                     if (self.scrollTo) {
-                                        // self.el[offsetPos] = self.scrollTo[offsetPos];
-                                        // scroll2Value = self.el[offsetPos];
-                                        // self.scrollTo = null;
+                                        // requestAnimationFrame(function () {
+                                        //     self.el[offsetPos] = self.scrollTo[offsetPos];
+                                        //     scroll2Value = self.el[offsetPos];
+                                        //     self.scrollTo = null;
+                                        // })
                                         // TODO - 当disableBodyScroll=true时，若用户快速滑动滚动条会出现延迟bug
                                         util[offsetPos].call(util, self.el, self.scrollTo[offsetPos], function () {
                                             scroll2Value = self.el[offsetPos];
