@@ -2641,12 +2641,13 @@
                     });
                 }
             });
-
+            var debug = false;
             /**
              * Check if scroll content/container size is changed
              */
             var updateScrollbars = function () {
-                var timer = null;
+                var timer = null,
+                    timerCounter = 0;
                 return function (force) {
                     BROWSER.scrolls.forEach(function (inst) {
                         var options = inst.options;
@@ -2656,10 +2657,25 @@
                         var scrolly = inst.scrolly;
                         if (force || options.autoUpdate && wrapper && util.isVisible(wrapper) && (el.scrollWidth != scrollx.size || el.scrollHeight != scrolly.size || wrapper.clientWidth != scrollx.visible || wrapper.clientHeight != scrolly.visible)) {
                             inst.update();
+                            if (options.debug) {
+                                window.console && console.log({
+                                    scrollHeight: el.scrollHeight + ':' + scrolly.size,
+                                    scrollWidth: el.scrollWidth + ':' + scrollx.size,
+                                    visibleHeight: wrapper.clientHeight + ':' + scrolly.visible,
+                                    visibleWidth: wrapper.clientWidth + ':' + scrollx.visible
+                                }, true);
+                                timerCounter++;
+                            }
                         }
                     });
-                    clearTimeout(timer);
-                    timer = setTimeout(updateScrollbars, 300);
+                    if (debug && timerCounter > 10) {
+                        window.console && console.log('Scroll updates exceed 10');
+                        updateScrollbars = function updateScrollbars() {
+                        };
+                    } else {
+                        clearTimeout(timer);
+                        timer = setTimeout(updateScrollbars, 300);
+                    }
                 };
             }();
 
@@ -2682,7 +2698,7 @@
                         // monit scrollbar size changed
                         updateScrollbars();
                         // add global resize listener
-                        var resize = function resize(e) {
+                        var resize = util.throttle(function (e) {
                             var force = false;
                             if (BROWSER.scroll && (BROWSER.scroll.height || BROWSER.scroll.width)) {
                                 var currentScroll = util.getBrowserScrollSize();
@@ -2692,7 +2708,7 @@
                                 }
                             }
                             updateScrollbars(force);
-                        };
+                        });
                         util.addEvent(window, 'resize', resize);
                         util.storeHandlers(this, 'resize', window, resize);
                     }
@@ -2949,8 +2965,10 @@
                         // calc scrollbar size
                         self._calcSize4Bars(bar);
 
-                        util.scrollLeft(self.el, initScroll.scrollLeft);
-                        util.scrollTop(self.el, initScroll.scrollTop);
+                        // util.scrollLeft(self.el, initScroll.scrollLeft);
+                        // util.scrollTop(self.el, initScroll.scrollTop);
+                        self.el.scrollLeft = initScroll.scrollLeft;
+                        self.el.scrollTop = initScroll.scrollTop;
                         util.trigger(self.el, 'scroll');
                     }
                 }, {
@@ -2990,7 +3008,6 @@
                 }, {
                     key: '_updateScroll',
                     value: function _updateScroll(d, scrollx) {
-                        debugger;
                         var container = this.el,
                             containerWrapper = this.containerWrapper || container,
                             scrollClass = 'scroll-scroll' + d + '_visible',

@@ -234,12 +234,12 @@ let util = Object.assign(common, {
         });
     },
 });
-
+let debug = false;
 /**
  * Check if scroll content/container size is changed
  */
 let updateScrollbars = (function () {
-    let timer = null;
+    let timer = null, timerCounter = 0;
     return function (force) {
         BROWSER.scrolls.forEach((inst) => {
             let options = inst.options;
@@ -255,10 +255,25 @@ let updateScrollbars = (function () {
                     wrapper.clientHeight != scrolly.visible
                 ))) {
                 inst.update();
+                if (options.debug) {
+                    window.console && console.log({
+                        scrollHeight: el.scrollHeight + ':' + scrolly.size,
+                        scrollWidth: el.scrollWidth + ':' + scrollx.size,
+                        visibleHeight: wrapper.clientHeight + ':' + scrolly.visible,
+                        visibleWidth: wrapper.clientWidth + ':' + scrollx.visible
+                    }, true);
+                    timerCounter++;
+                }
             }
         });
-        clearTimeout(timer);
-        timer = setTimeout(updateScrollbars, 300);
+        if (debug && timerCounter > 10) {
+            window.console && console.log('Scroll updates exceed 10');
+            updateScrollbars = function () {
+            };
+        } else {
+            clearTimeout(timer);
+            timer = setTimeout(updateScrollbars, 300);
+        }
     };
 })();
 
@@ -279,7 +294,7 @@ export default class Scrollbar {
             // monit scrollbar size changed
             updateScrollbars();
             // add global resize listener
-            let resize = function (e) {
+            let resize = util.throttle(function (e) {
                 let force = false;
                 if (BROWSER.scroll && (BROWSER.scroll.height || BROWSER.scroll.width)) {
                     let currentScroll = util.getBrowserScrollSize();
@@ -289,7 +304,7 @@ export default class Scrollbar {
                     }
                 }
                 updateScrollbars(force);
-            };
+            });
             util.addEvent(window, 'resize', resize);
             util.storeHandlers(this, 'resize', window, resize);
         }
@@ -547,8 +562,10 @@ export default class Scrollbar {
         // calc scrollbar size
         self._calcSize4Bars(bar);
 
-        util.scrollLeft(self.el, initScroll.scrollLeft);
-        util.scrollTop(self.el, initScroll.scrollTop);
+        // util.scrollLeft(self.el, initScroll.scrollLeft);
+        // util.scrollTop(self.el, initScroll.scrollTop);
+        self.el.scrollLeft = initScroll.scrollLeft;
+        self.el.scrollTop = initScroll.scrollTop;
         util.trigger(self.el, 'scroll');
     }
 
@@ -586,7 +603,6 @@ export default class Scrollbar {
     }
 
     _updateScroll(d, scrollx) {
-        debugger;
         var container = this.el,
             containerWrapper = this.containerWrapper || container,
             scrollClass = 'scroll-scroll' + d + '_visible',
@@ -775,9 +791,11 @@ export default class Scrollbar {
                     self.scrollTo[offsetPos] = scroll2Value;
 
                     if (self.scrollTo) {
-                        // self.el[offsetPos] = self.scrollTo[offsetPos];
-                        // scroll2Value = self.el[offsetPos];
-                        // self.scrollTo = null;
+                        // requestAnimationFrame(function () {
+                        //     self.el[offsetPos] = self.scrollTo[offsetPos];
+                        //     scroll2Value = self.el[offsetPos];
+                        //     self.scrollTo = null;
+                        // })
                         // TODO - 当disableBodyScroll=true时，若用户快速滑动滚动条会出现延迟bug
                         util[offsetPos].call(util, self.el, self.scrollTo[offsetPos], function () {
                             scroll2Value = self.el[offsetPos];

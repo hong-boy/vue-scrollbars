@@ -1,5 +1,5 @@
 <template>
-    <div v-bar class="scrollbar-dynamic wrapper">
+    <div v-bar.debug class="scrollbar-dynamic wrapper">
         <div class="page-content">
             <h1>Basic Scrollbars</h1>
             <div class="container">
