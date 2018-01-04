@@ -139,7 +139,7 @@
                 <div class="controls"></div>
                 <div class="content">
                     <div class="demo">
-                        <scrollbar>
+                        <scrollbar @onUpdate="onUpdate4PageMap">
                             <div slot="pageMap" class="scroll-element_outer">
                                 <div class="scroll-element_size">
                                     <div class="scroll-element_track"></div>
@@ -158,6 +158,39 @@
 </template>
 
 <script type="text/ecmascript-6">
+    /**
+     * Get inscribed area size
+     *
+     * @param int oW outer width
+     * @param int oH outer height
+     * @param int iW inner width
+     * @param int iH inner height
+     * @param bool R resize if smaller
+     */
+    function getInscribedArea(oW, oH, iW, iH, R){
+        if(!R && iW < oW && iH < oH){
+            return {
+                "h": iH,
+                "w": iW
+            };
+        }
+        if((oW / oH) > (iW / iH)){
+            return {
+                "h": oH,
+                "w": Math.round(oH * iW / iH)
+            }
+        } else {
+            return {
+                "h": Math.round(oW * iH / iW),
+                "w": oW
+            };
+        }
+    }
+
+    function genScreenshot(dom){
+        dom.style.backgroundImage = `url(${require('./tarzan.jpg')})`;
+    }
+
     export default {
         data(){
             return {
@@ -171,7 +204,11 @@
             onInit4PageMap(){
 
             },
-            onUpdate4PageMap(){
+            onUpdate4PageMap(scrollbar, container){
+                let ret = getInscribedArea(140, 140, scrollbar.scrollx.size, scrollbar.scrolly.size);
+                scrollbar.scrollx.scroll.style.width = `${ret.w}px`;
+                scrollbar.scrolly.scroll.style.height = `${ret.h}px`;
+                genScreenshot(scrollbar.scrollx.scroll);
             },
         },
         created(){
@@ -189,7 +226,7 @@
         height:100%;
     }
     .wrapper{
-        height:100vh; / / 需要显示声明height overflow: auto;
+        height:100vh; /** 需要显示声明height overflow: auto;*/
         width:100%;
     .scrollbar-dynamic{
         max-height:none;

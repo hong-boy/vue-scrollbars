@@ -47,26 +47,26 @@
                     stepScrolling: this.stepScrolling,
                     duration: this.duration,
                     scrollStep: this.scrollStep,
-//                    onDestroy: this.onDestroy,
-//                    onFallback: this.onFallback,
-//                    onInit: this.onInit,
-//                    onScroll: this.onScroll,
-//                    onUpdate: this.onUpdate,
                 };
                 option.onScroll = function (...args) {
-                    self.$emit('onScroll', args);
+                    args = ['onScroll', this].concat(args);
+                    self.$emit.apply(self, args);
                 };
                 option.onUpdate = function (...args) {
-                    self.$emit('onUpdate', args);
+                    args = ['onUpdate', this].concat(args);
+                    self.$emit.apply(self, args);
                 };
                 option.onInit = function (...args) {
-                    self.$emit('onInit', args);
+                    args = ['onInit', this].concat(args);
+                    self.$emit.apply(self, args);
                 };
                 option.onFallback = function (...args) {
-                    self.$emit('onFallback', args);
+                    args = ['onFallback', this].concat(args);
+                    self.$emit.apply(self, args);
                 };
                 option.onDestroy = function (...args) {
-                    self.$emit('onDestroy', args);
+                    args = ['onDestroy', this].concat(args);
+                    self.$emit.apply(self, args);
                 };
                 let pageMap = this.$slots.pageMap ? this.$slots.pageMap[0].elm : null;
                 if (pageMap) {
@@ -79,9 +79,7 @@
                 inst.init(option);
             });
         },
-        mounted() {
-//            console.log('mounted', this.$slots.content[0].elm);
-        },
+        mounted() {},
         updated() {
             let option = {
                 disableBodyScroll: this.disableBodyScroll,
